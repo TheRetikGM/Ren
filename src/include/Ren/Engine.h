@@ -1,0 +1,10 @@
+#pragma once
+#include <glad/glad.h>
+#include "GameLauncher.h"
+#include "shader.h"
+#include "config.h"
+#include "resource_manager.h"
+#include "Helper.hpp"
+#include "Logger.hpp"
+#include "Framebuffer.h"
+#include "Timer.hpp"

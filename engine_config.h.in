@@ -1,0 +1,12 @@
+#pragma once
+
+// Uncomment if building PACKAGE
+// #define _INSTALL
+
+#ifndef _INSTALL
+	#define ENGINE_SRC_DIR R"(@ENGINE_SRC_DIR@)"
+	#define ENGINE_SHADERS_DIR ENGINE_SRC_DIR "/shaders/"
+#else
+	#define ENGINE_SRC_DIR ".."
+	#define ENGINE_SHADERS_DIR ENGINE_SRC_DIR "/shaders/"
+#endif
