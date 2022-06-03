@@ -3,6 +3,8 @@
 // Uncomment if building PACKAGE
 // #define _INSTALL
 
+#mesondefine PLATFORM_WINDOWS
+
 // TODO: Accept this from meson configuration based on build type
 #define ENGINE_DEBUG
 

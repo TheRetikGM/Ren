@@ -6,7 +6,7 @@
 #include <memory>
 
 #ifdef ENGINE_DEBUG
-    #ifdef WIN32
+    #ifdef PLATFORM_WINDOWS
         #define BREAK() __debugbreak()
     #else
         #define BREAK() raise(SIGTRAP)
