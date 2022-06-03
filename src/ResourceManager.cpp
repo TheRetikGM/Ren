@@ -1,4 +1,4 @@
-#include "Ren/resource_manager.h"
+#include "Ren/ResourceManager.h"
 #include <exception>
 #include <sstream>
 #include <fstream>
@@ -9,6 +9,8 @@
 #include <glad/glad.h>
 #include <any>
 #include <vector>
+
+using namespace Ren;
 
 Shader& ResourceManager::LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name, std::string group)
 {

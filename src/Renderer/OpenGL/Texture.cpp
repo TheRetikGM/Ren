@@ -1,7 +1,9 @@
-#include "Ren/texture.h"
+#include "Ren/Renderer/OpenGL/Texture.h"
 #include <exception>
 #include <glad/glad.h>
 #include <cstdio>
+
+using namespace Ren;
 
 Texture2D::Texture2D()
 	: Width(0)

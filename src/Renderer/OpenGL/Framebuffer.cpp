@@ -1,5 +1,7 @@
-#include "Ren/Framebuffer.h"
+#include "Ren/Renderer/OpenGL/Framebuffer.h"
 #include "Ren/Logger.hpp"
+
+using namespace Ren;
 
 enum class BufferUsage: int {
     COLOR = GL_COLOR_ATTACHMENT0,
@@ -8,19 +10,19 @@ enum class BufferUsage: int {
     DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT
 };
 
-BufferUsage getBufferUsage(FramebufferInternalFormats format)
+BufferUsage getBufferUsage(FramebufferFormats format)
 {
     switch (format)
     {
-    case FramebufferInternalFormats::RGB:
-    case FramebufferInternalFormats::RGBA:
-    case FramebufferInternalFormats::RED:
+    case FramebufferFormats::RGB:
+    case FramebufferFormats::RGBA:
+    case FramebufferFormats::RED:
         return BufferUsage::COLOR;
-    case FramebufferInternalFormats::DEPTH24_STENCIL8:
+    case FramebufferFormats::DEPTH24_STENCIL8:
         return BufferUsage::DEPTH_STENCIL;
-    case FramebufferInternalFormats::DEPTH_COMPONENT24:
+    case FramebufferFormats::DEPTH_COMPONENT24:
         return BufferUsage::DEPTH;
-    case FramebufferInternalFormats::STENCIL_INDEX8:
+    case FramebufferFormats::STENCIL_INDEX8:
         return BufferUsage::STENCIL;
     default:
         return BufferUsage::COLOR;
@@ -112,7 +114,7 @@ Framebuffer::Framebuffer() : Attachments()
     nMaxAttachments += 2;   // Depth and Stencil.
 }
 
-Framebuffer& Framebuffer::AddAttachment(sptr_t<FramebufferAttachment> attachment)
+Framebuffer& Framebuffer::AddAttachment(Ref<FramebufferAttachment> attachment)
 {
     if (Attachments.size() == nMaxAttachments)
     {
@@ -239,12 +241,12 @@ std::shared_ptr<Framebuffer> Framebuffer::CreateBasicFramebuffer(unsigned int wi
 {
     auto aColor = std::make_shared<FramebufferAttachment>();
     aColor->storageType = StorageType::TEXTURE;
-    aColor->internalFormat = FramebufferInternalFormats::RGBA;
+    aColor->internalFormat = FramebufferFormats::RGBA;
     aColor->Generate(width, height);
 
     auto aDepthStencil = std::make_shared<FramebufferAttachment>();
     aDepthStencil->storageType = StorageType::RENDERBUFFER;
-    aDepthStencil->internalFormat = FramebufferInternalFormats::DEPTH24_STENCIL8;
+    aDepthStencil->internalFormat = FramebufferFormats::DEPTH24_STENCIL8;
     aDepthStencil->Generate(width, height);
 
     auto fbo = std::make_shared<Framebuffer>();
@@ -254,11 +256,11 @@ std::shared_ptr<Framebuffer> Framebuffer::CreateBasicFramebuffer(unsigned int wi
     return fbo;
 }
 
-sptr_t<Framebuffer> Framebuffer::Create2DBasicFramebuffer(unsigned int width, unsigned int height)
+Ref<Framebuffer> Framebuffer::Create2DBasicFramebuffer(unsigned int width, unsigned int height)
 {
     auto aColor = std::make_shared<FramebufferAttachment>();
     aColor->storageType = StorageType::TEXTURE;
-    aColor->internalFormat = FramebufferInternalFormats::RGBA;
+    aColor->internalFormat = FramebufferFormats::RGBA;
     aColor->Generate(width, height);
 
     auto fbo = std::make_shared<Framebuffer>();

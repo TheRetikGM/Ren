@@ -1,4 +1,4 @@
-#include "Ren/TextRenderer.h"
+#include "Ren/Renderer/TextRenderer.h"
 #include <iostream>
 #include <exception>
 #include <stdexcept>
@@ -8,7 +8,9 @@
 #include "engine_config.h"
 #include FT_FREETYPE_H
 
-#include "Ren/resource_manager.h"
+#include "Ren/ResourceManager.h"
+
+using namespace Ren;
 
 TextRenderer::TextRenderer(unsigned int width, unsigned int height)
 {

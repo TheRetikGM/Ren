@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
-#include "basic_renderer.h"
+#include "Renderer/BasicRenderer.h"
 
 class ICamera
 {

@@ -5,10 +5,10 @@
 #include <list>
 #include <any>
 #include <stdexcept>
-#include "texture.h"
-#include "shader.h"
+#include "Ren/Renderer/OpenGL/Texture.h"
+#include "Ren/Renderer/Shader.h"
 #include "AtlasTextRenderer.hpp"
-#include "sprite_renderer.h"
+#include "Renderer/SpriteRenderer.h"
 #include "Helper.hpp"   // Only for debugging. Not needed.
 
 /*
@@ -28,6 +28,8 @@
 */
 
 
+namespace Ren
+{
 namespace MenuSystem
 {
     // Handles drawing of the menu.
@@ -414,7 +416,7 @@ namespace MenuSystem
                     if (vPatchPos.y == menu.vSizeInPatches.y - 1)
                         vSourcePatch.y = 2;
 
-                    pSpriteRenderer->DrawPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
+                    pSpriteRenderer->RenderPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
                 }
             }
 
@@ -436,14 +438,14 @@ namespace MenuSystem
                 vPatchPos = glm::ivec2(menu.vSizeInPatches.x - 2, 0);
                 glm::vec2 vScreenLocation = glm::vec2(vPatchPos * menu.vPatchSize) * scale + glm::vec2(vScreenOffset);
                 glm::ivec2 vSourcePatch(3, 0);
-                pSpriteRenderer->DrawPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
+                pSpriteRenderer->RenderPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
             }
             if ((menu.nTotalRows - menu.nTopVisibleRow) > menu.vCellTable.y)
             {
                 vPatchPos = menu.vSizeInPatches - glm::ivec2(2, 1);
                 glm::vec2 vScreenLocation = glm::vec2(vPatchPos * menu.vPatchSize) * scale + glm::vec2(vScreenOffset);
                 glm::ivec2 vSourcePatch(3, 2);
-                pSpriteRenderer->DrawPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
+                pSpriteRenderer->RenderPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
             }
 
             // Draw visible items.
@@ -473,7 +475,7 @@ namespace MenuSystem
                     vPatchPos.y = vCell.y * (menu.vCellSize.y + menu.vCellPadding.y) + 1;
                     glm::ivec2 vSourcePatch(3, 1);
                     vScreenLocation = glm::vec2(vPatchPos * menu.vPatchSize) * scale + glm::vec2(vScreenOffset);
-                    pSpriteRenderer->DrawPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
+                    pSpriteRenderer->RenderPartialSprite(pTexGFX, vSourcePatch * nPatchSize, glm::vec2(nPatchSize), vScreenLocation, glm::vec2(menu.vPatchSize) * scale);
                 }
 
                 // Calculate cursor position in screen space in case system draws it.
@@ -494,7 +496,8 @@ namespace MenuSystem
             }
 
             // Draw cursor.
-            pSpriteRenderer->DrawPartialSprite(sprGFX, glm::ivec2(4, 0) * nPatchSize, glm::ivec2(32), manager.panels.back()->vCursorPos, glm::vec2(manager.panels.back()->vPatchSize * 2) * scale);
+            pSpriteRenderer->RenderPartialSprite(sprGFX, glm::ivec2(4, 0) * nPatchSize, glm::ivec2(32), manager.panels.back()->vCursorPos, glm::vec2(manager.panels.back()->vPatchSize * 2) * scale);
         }
     };
+}
 }

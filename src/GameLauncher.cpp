@@ -4,6 +4,9 @@
 #include "Ren/DebugColors.h"
 #include "Ren/Logger.hpp"
 #include "Ren/Core.h"
+#include "Ren/Renderer/Renderer.h"
+
+using namespace Ren;
 
 ImGuiIO* imgui_io = nullptr;
 
@@ -63,8 +66,8 @@ void GameLauncher::Launch()
             glfwSetWindowTitle(window, game_instance->WindowTitle.c_str());
 
             // Clear default framebuffer and render game scene.
-            glClearColor(game_instance->BackgroundColor.r, game_instance->BackgroundColor.g, game_instance->BackgroundColor.b, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            RenderAPI::SetClearColor(glm::vec4(game_instance->BackgroundColor, 1.0f));
+            RenderAPI::Clear();
             game_instance->Render();
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -176,7 +179,7 @@ void GameLauncher::end()
     glfwTerminate();
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void Ren::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 	GameLauncher::game_instance->Width = width;
@@ -184,7 +187,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	GameLauncher::game_instance->OnResize();
     GameLauncher::game_instance->_onResize();
 }
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+void Ren::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {		
 	if (key >= 0 && key < 1024)
 	{
@@ -197,16 +200,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 	}
 }
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void Ren::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	GameLauncher::game_instance->ProcessMouse(float(xpos), float(ypos));
     GameLauncher::game_instance->Input->vMousePosition = glm::vec2(float(xpos), float(ypos));
 }
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void Ren::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	GameLauncher::game_instance->ProcessScroll((float)yoffset);
 }
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void Ren::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button >= 0 && button < 8)
     {

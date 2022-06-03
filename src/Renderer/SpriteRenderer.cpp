@@ -1,5 +1,7 @@
-#include "Ren/sprite_renderer.h"
+#include "Ren/Renderer/SpriteRenderer.h"
 #include <glad/glad.h>
+
+using namespace Ren;
 
 SpriteRenderer::SpriteRenderer(Shader shader)
 {

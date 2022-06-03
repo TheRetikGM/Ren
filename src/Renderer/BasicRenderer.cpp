@@ -1,6 +1,9 @@
-#include "Ren/basic_renderer.h"
+#include "Ren/Renderer/BasicRenderer.h"
 #include <vector>
 #include <glad/glad.h>
+
+using namespace Ren;
+
 
 BasicRenderer::BasicRenderer(Shader shader)
 	: mp_shape_info(), shader(shader), lineWidth(1.0f)

@@ -1,8 +1,10 @@
-#include "Ren/shader.h"
+#include "Ren/Renderer/Shader.h"
 #include <glad/glad.h>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+
+using namespace Ren;
 
 const Shader& Shader::Use() const
 {

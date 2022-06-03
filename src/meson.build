@@ -1,17 +1,12 @@
 ren_src = files(
-  'Framebuffer.cpp',
   'GameCore.cpp',
   'GameLauncher.cpp',
-  'Renderbuffer.cpp',
-  'TextRenderer.cpp',
-  'basic_renderer.cpp',
-  'resource_manager.cpp',
-  'shader.cpp',
-  'sprite_renderer.cpp',
+  'ResourceManager.cpp',
   'stb_image.cpp',
   'stb_image_write.cpp',
-  'texture.cpp'
 )
+
+subdir('Renderer')
 
 ren_inc = include_directories('include', '../include')
 

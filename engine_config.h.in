@@ -3,6 +3,9 @@
 // Uncomment if building PACKAGE
 // #define _INSTALL
 
+// TODO: Accept this from meson configuration based on build type
+#define ENGINE_DEBUG
+
 #ifndef _INSTALL
 	#define ENGINE_SRC_DIR R"(@ENGINE_SRC_DIR@)"
 	#define ENGINE_SHADERS_DIR ENGINE_SRC_DIR "/shaders/"

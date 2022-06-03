@@ -1,4 +1,15 @@
-#include "Ren/Renderbuffer.h"
+#include "Ren/Renderer/OpenGL/Renderbuffer.h"
+#include <glad/glad.h>
+
+using namespace Ren;
+
+Renderbuffer::Renderbuffer()
+    : ID(0)
+    , Width(0)
+    , Height(0)
+    , InternalFormat(GL_DEPTH_COMPONENT24)
+{
+}
 
 void Renderbuffer::Generate(unsigned int width, unsigned int height)
 {
