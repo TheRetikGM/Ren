@@ -13,6 +13,7 @@ namespace Ren
 {
     struct Character {
         unsigned int TextureID;
+        // uint32_t texture_descriptor;
         glm::ivec2 Size;
         glm::ivec2 Bearing;
         unsigned int Advance;

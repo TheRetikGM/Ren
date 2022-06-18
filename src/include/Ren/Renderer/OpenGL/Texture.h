@@ -65,8 +65,10 @@ namespace Ren
 	public:
 		uint8_t ChannelCount = 4; // RGBA
 		bool SortBySize = false;
-		TextureBatch();
-		~TextureBatch() {}
+		
+		~TextureBatch();
+
+		static Ref<TextureBatch> Create();
 
 		// Check if texture fits into the batch. If it does not fit,
 		// then AddTexture() method will throw an Exception.
@@ -107,6 +109,8 @@ namespace Ren
 		uint32_t mMaxTextureWidth;
 		uint32_t mMaxTextureHeight;
 		uint8_t mTextureMargin = 2;	// Two pixels margin.
+
+		TextureBatch();
 
 		// Recursively using layering structure, set element offset in the batch texture.
 		bool insertToLayerAndSetOffset(uint32_t n_layer, const prebuf_elem& elem);

@@ -113,6 +113,15 @@ TextureBatch::TextureBatch()
 	Height = 0;
 	Filter_mag = GL_NEAREST;
 }
+TextureBatch::~TextureBatch()
+{
+	Delete();
+}
+Ref<TextureBatch> TextureBatch::Create()
+{
+	return Ref<TextureBatch>(new TextureBatch());
+}
+
 
 bool TextureBatch::insertToLayerAndSetOffset(uint32_t n_layer, const prebuf_elem& elem)
 {
@@ -235,12 +244,17 @@ void TextureBatch::Build()
 	switch (ChannelCount)
 	{
 		case 1: Image_format = GL_RED; break;
+		case 2: Image_format = GL_RG; break;
 		case 3: Image_format = GL_RGB; break;
 		case 4: Image_format = GL_RGBA; break;
 	}
 	Internal_format = Image_format;
+	// Disable byte alignment restriction.
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	Generate(Width, Height, mBuffer);
 	delete[] mBuffer;
+
+	mCreated = true;
 }
 
 void TextureBatch::createBorder(glm::ivec2 offset, glm::ivec2 size)
