@@ -12,7 +12,7 @@
 
 namespace Ren
 {
-    enum class FramebufferFormats: unsigned int {
+    enum class AttachmentFormats: unsigned int {
         RGBA = GL_RGBA,
         RGB = GL_RGB,
         RED = GL_RED,
@@ -28,7 +28,7 @@ namespace Ren
     struct FramebufferAttachment
     {
         StorageType storageType = StorageType::TEXTURE;
-        FramebufferFormats internalFormat = FramebufferFormats::RGB;
+        AttachmentFormats internalFormat = AttachmentFormats::RGB;
         std::variant<Texture2D, Renderbuffer> storage;
         int nColorAttachment = -1;
         unsigned int bufferID = 0;

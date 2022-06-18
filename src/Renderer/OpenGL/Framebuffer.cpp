@@ -10,19 +10,19 @@ enum class BufferUsage: int {
     DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT
 };
 
-BufferUsage getBufferUsage(FramebufferFormats format)
+BufferUsage getBufferUsage(AttachmentFormats format)
 {
     switch (format)
     {
-    case FramebufferFormats::RGB:
-    case FramebufferFormats::RGBA:
-    case FramebufferFormats::RED:
+    case AttachmentFormats::RGB:
+    case AttachmentFormats::RGBA:
+    case AttachmentFormats::RED:
         return BufferUsage::COLOR;
-    case FramebufferFormats::DEPTH24_STENCIL8:
+    case AttachmentFormats::DEPTH24_STENCIL8:
         return BufferUsage::DEPTH_STENCIL;
-    case FramebufferFormats::DEPTH_COMPONENT24:
+    case AttachmentFormats::DEPTH_COMPONENT24:
         return BufferUsage::DEPTH;
-    case FramebufferFormats::STENCIL_INDEX8:
+    case AttachmentFormats::STENCIL_INDEX8:
         return BufferUsage::STENCIL;
     default:
         return BufferUsage::COLOR;
@@ -241,12 +241,12 @@ std::shared_ptr<Framebuffer> Framebuffer::CreateBasicFramebuffer(unsigned int wi
 {
     auto aColor = std::make_shared<FramebufferAttachment>();
     aColor->storageType = StorageType::TEXTURE;
-    aColor->internalFormat = FramebufferFormats::RGBA;
+    aColor->internalFormat = AttachmentFormats::RGBA;
     aColor->Generate(width, height);
 
     auto aDepthStencil = std::make_shared<FramebufferAttachment>();
     aDepthStencil->storageType = StorageType::RENDERBUFFER;
-    aDepthStencil->internalFormat = FramebufferFormats::DEPTH24_STENCIL8;
+    aDepthStencil->internalFormat = AttachmentFormats::DEPTH24_STENCIL8;
     aDepthStencil->Generate(width, height);
 
     auto fbo = std::make_shared<Framebuffer>();
@@ -260,7 +260,7 @@ Ref<Framebuffer> Framebuffer::Create2DBasicFramebuffer(unsigned int width, unsig
 {
     auto aColor = std::make_shared<FramebufferAttachment>();
     aColor->storageType = StorageType::TEXTURE;
-    aColor->internalFormat = FramebufferFormats::RGBA;
+    aColor->internalFormat = AttachmentFormats::RGBA;
     aColor->Generate(width, height);
 
     auto fbo = std::make_shared<Framebuffer>();
