@@ -41,6 +41,8 @@ VertexArray& VertexArray::AddVertexBuffer(const Ref<VertexBuffer>& buf)
 
     mVertexBuffers.push_back(buf);
 
+    glBindVertexArray(0);
+
     return *this;
 }
 VertexArray& VertexArray::SetElementBuffer(const Ref<ElementBuffer>& buf)
@@ -49,6 +51,8 @@ VertexArray& VertexArray::SetElementBuffer(const Ref<ElementBuffer>& buf)
     buf->Bind();
     
     mElementBuffer = buf;
+
+    glBindVertexArray(0);
 
     return *this;
 }

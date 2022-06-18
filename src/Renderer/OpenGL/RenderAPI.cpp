@@ -12,18 +12,18 @@ void RenderAPI::Clear()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-void RenderAPI::DrawArrays(const Ref<VertexArray>& vao)
+void RenderAPI::DrawArrays(const Ref<VertexArray>& vao, uint32_t first, uint32_t count)
 {
-    glDrawArrays(GL_TRIANGLES, 0, vao->GetVertexBuffers()[0]->GetVertexCount());
+    glDrawArrays(GL_TRIANGLES, first, count);
 }
-void RenderAPI::DrawElements(const Ref<VertexArray>& vao)
+void RenderAPI::DrawElements(const Ref<VertexArray>& vao, uint32_t count)
 {
-    glDrawElements(GL_TRIANGLES, vao->GetElementBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
 }
-void RenderAPI::Draw(const Ref<VertexArray>& vao)
+void RenderAPI::Draw(const Ref<VertexArray>& vao, uint32_t count)
 {
     if (vao->GetElementBuffer())
-        DrawElements(vao);
+        DrawElements(vao, count == 0 ? vao->GetElementBuffer()->GetCount() : count);
     else
-        DrawArrays(vao);
+        DrawArrays(vao, 0, count == 0 ? vao->GetVertexBuffers()[0]->GetVertexCount() : count);
 }

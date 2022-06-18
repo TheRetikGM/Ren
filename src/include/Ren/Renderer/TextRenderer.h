@@ -43,4 +43,20 @@ namespace Ren
 
         void delete_textures();
     };
+
+    // struct _Character {
+    //     uint32_t texture_descriptor;
+    //     glm::ivec2 size;
+    //     glm::ivec2 bearing;
+    //     uint32_t advance;
+    // };
+
+    // class _TextRenderer
+    // {
+    // public:
+    //     std::map<char, Character> Characters;
+    //     unsigned int RowSpacing;
+
+
+    // };
 }

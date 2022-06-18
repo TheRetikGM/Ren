@@ -52,6 +52,7 @@ namespace Ren
         inline void SetLayout(const BufferLayout& layout) { mLayout = layout; }
         inline const BufferLayout& GetLayout() const { return mLayout; }
         inline uint32_t GetVertexCount() const { return mSize / sizeof(float); }
+        void UpdateData(uint32_t offset, uint32_t size, float* vertices) const;
 
         static Ref<VertexBuffer> Create(float* vertices, size_t size, BufferUsage usage = BufferUsage::StaticDraw);
     private:
@@ -73,6 +74,7 @@ namespace Ren
 
         static Ref<ElementBuffer> Create(uint32_t* indexes, size_t size, BufferUsage usage = BufferUsage::StaticDraw);
 
+        void UpdateData(uint32_t offset, uint32_t size, uint32_t* indices) const;
         inline uint32_t GetCount() { return mElementCount; }
     private:
         unsigned int mID;

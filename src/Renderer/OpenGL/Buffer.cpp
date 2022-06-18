@@ -118,6 +118,15 @@ void VertexBuffer::Unbind()
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+void VertexBuffer::UpdateData(uint32_t offset, uint32_t size, float* vertices) const
+{
+    REN_ASSERT(offset + size < mSize, "Update request is reaching out of the buffer.");
+
+    glBindBuffer(GL_ARRAY_BUFFER, mID);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 
 
 // ====================
@@ -146,5 +155,13 @@ void ElementBuffer::Bind()
 }
 void ElementBuffer::Unbind()
 {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+void ElementBuffer::UpdateData(uint32_t offset, uint32_t size, uint32_t* indices) const
+{
+    REN_ASSERT(offset + size < mSize, "Update request is reaching out of the buffer.");
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mID);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, indices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
