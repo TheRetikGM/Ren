@@ -8,6 +8,23 @@
 
 using namespace Ren;
 
+uint8_t formatToChannelCount(uint32_t format)
+{
+	switch (format)
+	{
+		case GL_RED:	 return 1; break;
+		case GL_RG: 
+		case GL_RG16F:	 return 2; break;
+		case GL_RGB:
+		case GL_RGB16F:  return 3; break;
+		case GL_RGBA:
+		case GL_RGBA16F: return 4; break;
+		default: 
+			return 3; 
+			break;
+	}
+}
+
 Texture2D::Texture2D()
 	: Width(0)
 	, Height(0)
@@ -94,10 +111,10 @@ RawTexture RawTexture::Load(const char* filename)
 
 	return tex;
 }
-void RawTexture::Delete(RawTexture& texture)
+void RawTexture::Delete()
 {
-	stbi_image_free(texture.data);
-	texture.data = nullptr;
+	stbi_image_free(data);
+	data = nullptr;
 }
 
 // =============================
@@ -180,6 +197,20 @@ int32_t TextureBatch::AddTexture(const RawTexture& texture)
 	std::memcpy(e.data_copy, texture.data, texture.width * texture.height * texture.channel_count);
 	mPrebuffer.push_back(e);
 
+	// Perform insertion check.
+	if (!SortBySize) 
+	{
+		if (insertToLayerAndSetOffset(0, mPrebuffer.back()))
+			return desc.descriptor_id;
+		else 
+		{
+			delete[] mPrebuffer.back().data_copy;
+			mPrebuffer.pop_back();
+			mTextureDescriptors.pop_back();
+			return -1;
+		}
+	}
+
 	return desc.descriptor_id;
 }
 
@@ -192,15 +223,15 @@ void TextureBatch::Build()
 		std::sort(mPrebuffer.begin(), mPrebuffer.end(), [](const prebuf_elem& a, const prebuf_elem& b){ 
 			return a.size > b.size; 
 		});
+		// Create layered structure.
+		for (auto&& elem : mPrebuffer) 
+		{
+			bool success = insertToLayerAndSetOffset(0, elem);
+			if (!success)
+				LOG_E("Could not add texture to batch!");
+		}
 	}
 	
-	// Create layered structure.
-	for (auto&& elem : mPrebuffer) 
-	{
-		bool success = insertToLayerAndSetOffset(0, elem);
-		if (!success)
-			LOG_E("Could not add texture to batch!");
-	}
 
 	// Get batch texture dimensions.
 	Height = mLayers.back().top_offset + mLayers.back().height;
@@ -281,3 +312,51 @@ void TextureBatch::createBorder(glm::ivec2 offset, glm::ivec2 size)
 	std::memcpy(&mBuffer[buf(offset + size)], &mBuffer[buf(offset + size - glm::ivec2(1))], ChannelCount);
 }
 
+/////////////////////////////////////////////////////////////////////////
+///////////////////////////////// Utils /////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "Ren/Renderer/OpenGL/Framebuffer.h"
+#include <stb_image_write.h>
+
+RawTexture Utils::GLToRawTexture(const Texture2D& gl_texture)
+{
+	// Create frambuffer color attachment, with this GL texture as a storage.
+	auto a = std::make_shared<FramebufferAttachment>();
+	a->internalFormat = (AttachmentFormats)gl_texture.Internal_format;
+	a->storageType = StorageType::TEXTURE;
+	a->bufferID = gl_texture.ID;
+	a->storage = gl_texture;
+
+	// Generate FBO.
+	auto fbo = std::make_shared<Framebuffer>();
+	fbo->AddAttachment(a);
+	fbo->Generate(gl_texture.Width, gl_texture.Height);
+
+	// Set initial params for raw texture.
+	RawTexture tex;
+	tex.channel_count = formatToChannelCount(gl_texture.Internal_format);
+	tex.data = new uint8_t[gl_texture.Width * gl_texture.Height * tex.channel_count];
+	tex.width = gl_texture.Width;
+	tex.height = gl_texture.Height;
+
+	// Backup binding.
+	uint32_t fbo_binding;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&fbo_binding);
+
+	// Copy pixels from color attachment to raw texture's data.
+	fbo->Bind();
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadPixels(0, 0, gl_texture.Width, gl_texture.Height, gl_texture.Internal_format, GL_UNSIGNED_BYTE, tex.data);
+
+	// Restore OpenGL state and delete FBO.
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_binding);
+	fbo.reset();
+	a.reset();
+
+	return tex;
+}
+void Utils::SaveTexturePNG(const char* filename, const RawTexture& texture, bool flip_vertically)
+{
+	stbi_flip_vertically_on_write(int(flip_vertically));
+	stbi_write_png(filename, texture.width, texture.height, texture.channel_count, texture.data, texture.width * texture.channel_count);
+}

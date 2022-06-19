@@ -19,8 +19,7 @@ namespace Ren
     struct Material
     {
         glm::vec4 color = glm::vec4(0.0f);
-        Ref<Texture2D> texture = nullptr;
-        uint32_t texture_id = 0;
+        int32_t texture_id = -1;
 
         bool hasColor();
         bool hasTexture();
@@ -40,26 +39,41 @@ namespace Ren
             Transform transform;
             Material material;
         };
-        inline static uint32_t mVBOSize = 250 * 4 * 10 * sizeof(float);  // 250 quads, (4 vertices, 10 floats of shader attributes) per vertex
-        inline static uint32_t mEBOSize = 250 * 6 * sizeof(uint32_t);
+        uint32_t mVBOSize = 250 * 4 * 10 * sizeof(float);  // 250 quads, (4 vertices, 10 floats of shader attributes) per vertex
+        uint32_t mEBOSize = 250 * 6 * sizeof(uint32_t);
+        inline static Renderer2D* mInstance = nullptr;
     public:
-        static void Init();
-        static void Destroy();
+        static Renderer2D* GetInstance();
+        static void DeleteInstance();
 
-        static void BeginScene(glm::mat4 projection, glm::mat4 view);
-        static void EndScene();
+        // For now, will clear all resources.
+        void BeginPrepare();
+        int32_t PrepareTexture(const RawTexture& texture);  // Prepare texture for rendering. Should be done as preprocessing step;
+        void EndPrepare();
+        void ClearResources();
 
-        static void SubmitQuad(const Transform& trans, const Material& mat); 
-
-        static void Render();
+        void BeginScene(glm::mat4 projection, glm::mat4 view);
+        void EndScene();
+        void SubmitQuad(const Transform& trans, const Material& mat);
+        void Render();
+        // Return texture batch, in which given texture resides.
+        inline const Ref<TextureBatch>& GetTextureBatch(int32_t texture_id) const { return mTextures[mTextureMapping[texture_id].batch_i]; }
+        TextureDescriptor GetTextureDescriptor(int32_t texture_id);
     protected:
-        inline static Shader mShader;
-        inline static std::vector<Vertex> mVertices;    // Vertices and Indices are used for processing step.
-        inline static std::vector<uint32_t> mIndices;
-        inline static std::vector<QuadSubmission> mQuadSubmissions;
-        inline static Ref<VertexArray> mQuadVAO;
-        inline static std::vector<Ref<TextureBatch>> mTextures;
-        inline static glm::mat4 mPV;
+        Shader mShader;
+        std::vector<Vertex> mVertices;    // Vertices and Indices are used for processing step.
+        std::vector<uint32_t> mIndices;
+        std::vector<QuadSubmission> mQuadSubmissions;
+        Ref<VertexArray> mQuadVAO;
+        glm::mat4 mPV;
+
+        // Textures
+        struct batch_tex_desc { uint32_t batch_i, desc_i; };
+        std::vector<batch_tex_desc> mTextureMapping;    // Mapping of texture IDs to their corresponding batch and texture descriptor.
+        std::vector<Ref<TextureBatch>> mTextures;
+        bool mPreparing;
+
+        Renderer2D();
     };
 
 

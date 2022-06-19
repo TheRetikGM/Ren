@@ -57,14 +57,14 @@ namespace Ren
 		// Load texture using STBI
 		static RawTexture Load(const char* filename);
 		// Free data pointed to by data using STBI
-		static void Delete(RawTexture& texture);
+		void Delete();
 	};
 
 	class TextureBatch : public Texture2D
 	{
 	public:
-		uint8_t ChannelCount = 4; // RGBA
 		bool SortBySize = false;
+		uint8_t ChannelCount = 4; // RGBA
 		
 		~TextureBatch();
 
@@ -116,5 +116,11 @@ namespace Ren
 		bool insertToLayerAndSetOffset(uint32_t n_layer, const prebuf_elem& elem);
 		// Create 1px border around specified region. Border acts as WRAP TO EDGE.
 		void createBorder(glm::ivec2 offset, glm::ivec2 size);
+	};
+
+	namespace Utils
+	{
+		RawTexture GLToRawTexture(const Texture2D& gl_texture);
+		void SaveTexturePNG(const char* filename, const RawTexture& texture, bool flip_vertically);
 	};
 }

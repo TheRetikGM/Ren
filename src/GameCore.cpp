@@ -39,6 +39,7 @@ void GameCore::DeleteEngine()
 {
 	// Delete everything that was not deleted along with engine stuff.
 	ResourceManager::Clear();
+	renderer_2d->DeleteInstance();
 }
 void GameCore::InitEngine()
 {
@@ -55,6 +56,7 @@ void GameCore::InitEngine()
 	basic_renderer = std::make_shared<BasicRenderer>(basic);
 	sprite_renderer = std::make_shared<SpriteRenderer>(sprite);
 	text_renderer = std::make_shared<TextRenderer>(Width, Height);
+	renderer_2d = Renderer2D::GetInstance();
 }
 void GameCore::ProcessInput()
 {

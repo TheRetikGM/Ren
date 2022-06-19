@@ -27,3 +27,7 @@ void RenderAPI::Draw(const Ref<VertexArray>& vao, uint32_t count)
     else
         DrawArrays(vao, 0, count == 0 ? vao->GetVertexBuffers()[0]->GetVertexCount() : count);
 }
+void RenderAPI::SetActiveTextureUnit(uint32_t unit)
+{
+    glActiveTexture(GL_TEXTURE0 + unit);
+}

@@ -14,5 +14,6 @@ namespace Ren
         static void DrawElements(const Ref<VertexArray>& vao, uint32_t count);
         // Automatically decide, if what draw call should be called
         static void Draw(const Ref<VertexArray>& vao, uint32_t count = 0);
+        static void SetActiveTextureUnit(uint32_t unit);
     };
 }

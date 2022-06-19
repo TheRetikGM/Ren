@@ -5,6 +5,7 @@
 #include "Renderer/BasicRenderer.h"
 #include "Renderer/SpriteRenderer.h"
 #include "Renderer/TextRenderer.h"
+#include "Renderer/Renderer.h"
 #include <memory>
 
 namespace Ren
@@ -44,9 +45,10 @@ namespace Ren
 
 		static const glm::mat4& GetPixelProjection() { return pixel_projection; }
 	protected:
-		std::shared_ptr<BasicRenderer> basic_renderer;
-		std::shared_ptr<SpriteRenderer> sprite_renderer;
-		std::shared_ptr<TextRenderer> text_renderer;
+		Ref<BasicRenderer> basic_renderer;
+		Ref<SpriteRenderer> sprite_renderer;
+		Ref<TextRenderer> text_renderer;
+		Renderer2D* renderer_2d = nullptr;
 
 		// ===== State variables =====
 		// Refresh pixel projection matrix for built-in renderers on window resize event.
