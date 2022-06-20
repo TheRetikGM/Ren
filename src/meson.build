@@ -16,7 +16,7 @@ glad_inc = glad_proj.get_variable('glad_inc')
 glfw_dep = dependency('glfw3', fallback : ['glfw', 'glfw_dep'])
 imgui_proj = subproject('imgui')
 imgui_dep = imgui_proj.get_variable('imgui_dep')
-imgui_inc = imgui_proj.get_variable('imgui_inc')
+#imgui_inc = imgui_proj.get_variable('imgui_inc')
 
 cc = meson.get_compiler('c')
 if build_machine.system() == 'linux'
@@ -44,9 +44,9 @@ endif
 
 ren_lib = library('ren',
   ren_src,
-  include_directories : [ren_inc, ren_conf_inc, imgui_inc],
+  include_directories : [ren_inc, ren_conf_inc],
   dependencies : ren_depends)
 
 ren_dep = declare_dependency(
-  include_directories : [ren_inc, ren_conf_inc, imgui_inc, glad_inc],
+  include_directories : [ren_inc, ren_conf_inc, glad_inc],
   link_with : ren_lib)

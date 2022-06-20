@@ -2,6 +2,8 @@
 [bB][uU][iI][lL][dD]
 [bB][uU][iI][lL][dD][dD][iI][rR]
 imgui.ini
+subprojects/imgui-*
+subprojects/packagecache
 
 # Prerequisites
 *.d
