@@ -12,51 +12,29 @@
 namespace Ren
 {
     struct Character {
-        unsigned int TextureID;
-        // uint32_t texture_descriptor;
-        glm::ivec2 Size;
-        glm::ivec2 Bearing;
-        unsigned int Advance;
-    };
+        int32_t texture_id;
+        glm::ivec2 size;
+        glm::ivec2 bearing;
+        uint32_t advance;
+    }; 
 
     class TextRenderer
     {
     public:
         std::map<char, Character> Characters;
-        Shader TextShader;
-        std::vector<std::string> Errors;
-        unsigned int RowSpacing = 5;
+        unsigned int RowSpacing;
 
-        // Initialize text renderer with screen dimesions, used for projection.
-        TextRenderer(unsigned int width, unsigned int height);
         ~TextRenderer();
+        static Ref<TextRenderer> Create() { return Ref<TextRenderer>(new TextRenderer()); }
 
-        void Load(std::string font_path, unsigned int fontSize, int mag_filter = 0x2610, int min_filter = 0x2610);
+        void Load(std::string font_path, unsigned int fontSize);
         void RenderText(std::string text, float x, float y, float scale, glm::vec3 color = glm::vec3(1.0f)) const;
         glm::ivec2 GetStringSize(std::string str, float scale = 1.0f) const;
-        unsigned int GetFontSize() const { return fontSize; }
-        void SetProjection(glm::mat4 projection);
+        unsigned int GetFontSize() const { return mFontSize; }
 
     private:
-        unsigned int VAO, VBO;
-        unsigned int fontSize = 0;
+        uint8_t mFontSize;
 
-        void delete_textures();
+        TextRenderer();
     };
-
-    // struct _Character {
-    //     uint32_t texture_descriptor;
-    //     glm::ivec2 size;
-    //     glm::ivec2 bearing;
-    //     uint32_t advance;
-    // };
-
-    // class _TextRenderer
-    // {
-    // public:
-    //     std::map<char, Character> Characters;
-    //     unsigned int RowSpacing;
-
-
-    // };
 }

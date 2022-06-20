@@ -15,7 +15,12 @@ inline float get_time_from_start()
     return float(glfwGetTime());
 }
 
-GameLauncher::GameLauncher(GameCore* instance)
+void Ren::glfw_error_callback(int error_code, const char* error_desc)
+{
+    Logger::LogE("[OpenGL]: " + std::string(error_desc), "", -1);
+}
+
+GameLauncher::GameLauncher(GameCore* instance) 
 {
     game_instance = instance;
 }
@@ -111,6 +116,9 @@ void GameLauncher::init_glfw()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    #ifdef ENGINE_DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); 
+    #endif
 
     // Create window and assign callbacks.
     window = glfwCreateWindow(game_instance->Width, game_instance->Height, game_instance->WindowTitle.c_str(), nullptr, nullptr);
@@ -120,6 +128,7 @@ void GameLauncher::init_glfw()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetErrorCallback(glfw_error_callback);
     glfwSwapInterval(1);
 }
 void GameLauncher::init_glad()

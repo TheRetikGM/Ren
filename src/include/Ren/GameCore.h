@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include "InputInterface.hpp"
 #include "Renderer/BasicRenderer.h"
-#include "Renderer/SpriteRenderer.h"
 #include "Renderer/TextRenderer.h"
 #include "Renderer/Renderer.h"
 #include <memory>
@@ -46,7 +45,6 @@ namespace Ren
 		static const glm::mat4& GetPixelProjection() { return pixel_projection; }
 	protected:
 		Ref<BasicRenderer> basic_renderer;
-		Ref<SpriteRenderer> sprite_renderer;
 		Ref<TextRenderer> text_renderer;
 		Renderer2D* renderer_2d = nullptr;
 

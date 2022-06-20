@@ -10,7 +10,7 @@ namespace Ren
     struct Transform
     {
         glm::vec2 position;
-        glm::vec2 size;
+        glm::vec2 scale;
         // Rotation in degrees.
         float rotation = 0.0f;
 

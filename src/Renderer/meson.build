@@ -6,7 +6,6 @@ ren_renderer_src = files(
     'OpenGL/Texture.cpp',
     'OpenGL/Renderbuffer.cpp',
     'Renderer.cpp',
-    'SpriteRenderer.cpp',
     'BasicRenderer.cpp',
     'TextRenderer.cpp',
     'Shader.cpp'

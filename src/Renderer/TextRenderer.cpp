@@ -9,47 +9,26 @@
 #include FT_FREETYPE_H
 
 #include "Ren/ResourceManager.h"
+#include "Ren/Renderer/Renderer.h"
 
 using namespace Ren;
 
-TextRenderer::TextRenderer(unsigned int width, unsigned int height)
-{
-    this->TextShader = ResourceManager::LoadShader(ENGINE_SHADERS_DIR "text_2d.vert", ENGINE_SHADERS_DIR "text_2d.frag", nullptr, "text");
-    this->TextShader.SetMat4("projection", glm::ortho(0.0f, (float)width, (float)height, 0.0f), true);
-    this->TextShader.SetInt("textBitmap", 0);
 
-    glGenVertexArrays(1, &this->VAO);
-    glGenBuffers(1, &this->VBO);
-    glBindVertexArray(this->VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+Renderer2D* renderer_2d;
+
+TextRenderer::TextRenderer()
+{
+    renderer_2d = Renderer2D::GetInstance();
+    // TODO?: Ask renderer to prepare new batch texture or something?
 }
 TextRenderer::~TextRenderer()
 {
-    delete_textures();
     this->Characters.clear();
-    this->Errors.clear();
-}
-void TextRenderer::delete_textures()
-{
-    for (auto& [c, character] : this->Characters)
-        glDeleteTextures(1, &character.TextureID);
 }
 
-void TextRenderer::SetProjection(glm::mat4 projection)
+void TextRenderer::Load(std::string font, unsigned int font_size)
 {
-    this->TextShader.SetMat4("projection", projection, true);
-}
-
-void TextRenderer::Load(std::string font, unsigned int fontSize, int mag_filter, int min_filter)
-{
-    delete_textures();
     this->Characters.clear();
-    this->Errors.clear();
 
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
@@ -59,61 +38,53 @@ void TextRenderer::Load(std::string font, unsigned int fontSize, int mag_filter,
     if(FT_New_Face(ft, font.c_str(), 0, &face))
         throw std::runtime_error("Failed to load font '" + font + "'.");
     
-    FT_Set_Pixel_Sizes(face, 0, fontSize);
-    // Disable byte-alignment restriction
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    FT_Set_Pixel_Sizes(face, 0, font_size);
 
     for (GLubyte c = 0; c < 128; c++)
     {
         // Load character glyph
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
         {
-            this->Errors.push_back("Failed to load Glyph. C = " + std::to_string(c));
+            LOG_E("Failed to load Glyph. C = " + std::to_string(c));
             continue;
         }
 
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RED, 
-                face->glyph->bitmap.width,
-                face->glyph->bitmap.rows,
-                0,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                face->glyph->bitmap.buffer
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
+        RawTexture tex;
+        tex.channel_count = 4;
+        tex.width = face->glyph->bitmap.width;
+        tex.height = face->glyph->bitmap.rows;
+        tex.data = new uint8_t[tex.width * tex.height * 4];
+        
+        // Glyph buffer has only one channel, so we need to create RGBA texture
+        // which has all the required channels. Also, the 1 channel in FreeType
+        // represents transparency, so we set it as Alpha and all the other 
+        // channels will be 255, so that we can easily set color later.
+        for (int i = 0; i < tex.width * tex.height; i++)
+        {
+            std::memset(&tex.data[i * 4], 255, 3);  // Set first 3 channels to  255
+            tex.data[i * 4 + 3] = face->glyph->bitmap.buffer[i];  // Set the alpha value
+        }
+
+        int32_t tex_id = renderer_2d->PrepareTexture(tex);
+        delete[] tex.data;
 
         // Store character for later use
         Character character = {
-            texture,
+            tex_id,
             glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
             (unsigned int)face->glyph->advance.x
         };
         Characters.insert(std::pair<char, Character>(c, character));
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    this->fontSize = fontSize;
+    this->mFontSize = font_size;
 }
 void TextRenderer::RenderText(std::string text, float x, float y, float scale, glm::vec3 color) const
 {
-    this->TextShader.Use();
-    this->TextShader.SetVec3f("TextColor", color);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(this->VAO);
-
     float x_orig = x;
 
     std::string::const_iterator c;
@@ -122,38 +93,29 @@ void TextRenderer::RenderText(std::string text, float x, float y, float scale, g
         if (*c == '\n')
         {
             x = x_orig;
-            y += (Characters.at('H').Size.y + RowSpacing) * scale;
+            y += (Characters.at('H').size.y + RowSpacing) * scale;
             continue;
         }
 
         Character ch = Characters.at(*c);
 
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y + (Characters.at('H').Bearing.y - ch.Bearing.y) * scale;
+        float xpos = x + ch.bearing.x * scale;
+        float ypos = y + (Characters.at('H').bearing.y - ch.bearing.y) * scale;
 
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
+        float w = ch.size.x * scale;
+        float h = ch.size.y * scale;
 
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 1.0f},
-            { xpos + w, ypos,       1.0f, 0.0f},
-            { xpos,     ypos,       0.0f, 0.0f},
-            
-            { xpos,     ypos + h,   0.0f, 1.0f},
-            { xpos + w, ypos + h,   1.0f, 1.0f},
-            { xpos + w, ypos,       1.0f, 0.0f}
-        };
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        Transform t;
+        t.position = glm::vec2(xpos, ypos);
+        t.scale = glm::vec2(w, h);
+        Material m;
+        m.color = glm::vec4(color, 1.0f);
+        m.texture_id = ch.texture_id;
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        renderer_2d->SubmitQuad(t, m);
 
-        x += (ch.Advance >> 6) * scale;
+        x += (ch.advance >> 6) * scale;
     }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 glm::ivec2 TextRenderer::GetStringSize(std::string str, float scale) const
@@ -162,8 +124,8 @@ glm::ivec2 TextRenderer::GetStringSize(std::string str, float scale) const
     size_t len = str.length();
     for (int i = 0; i < int(len); i++)
     {
-        size.x += Characters.at(str[i]).Advance >> 6;
-        size.y = std::max(size.y, Characters.at(str[i]).Size.y);
+        size.x += Characters.at(str[i]).advance >> 6;
+        size.y = std::max(size.y, Characters.at(str[i]).size.y);
     }
 
     return size;

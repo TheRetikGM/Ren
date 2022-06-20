@@ -39,7 +39,10 @@ class Logger
 public:
     static void Log(const LogType& type, const std::string& message, const std::string& file, const int& line)
     {
-        std::cout << LogTypeToString(type) << " " << file << ":" << line << ": " << message << std::endl;
+        if (file == "" && line == -1)
+            std::cout << LogTypeToString(type) << ": " << message << std::endl;
+        else
+            std::cout << file << ":" << line << ": " << LogTypeToString(type) << " " << message << std::endl;
     }
     static void LogI(const std::string& message, const std::string& file, const int& line) { Log(LogType::Info, message, file, line); }
     static void LogE(const std::string& message, const std::string& file, const int& line) { Log(LogType::Error, message, file, line); }

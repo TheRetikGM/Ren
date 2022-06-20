@@ -12,6 +12,7 @@ namespace Ren
     void mouse_callback(GLFWwindow* window, double xpos, double ypos);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+    void glfw_error_callback(int error_code, const char* error_msg);
 
     enum class ImGuiTheme: int { dark, light, classic };
 
