@@ -59,7 +59,7 @@ void TextRenderer::Load(std::string font, unsigned int font_size)
         // which has all the required channels. Also, the 1 channel in FreeType
         // represents transparency, so we set it as Alpha and all the other 
         // channels will be 255, so that we can easily set color later.
-        for (int i = 0; i < tex.width * tex.height; i++)
+        for (uint32_t i = 0; i < tex.width * tex.height; i++)
         {
             std::memset(&tex.data[i * 4], 255, 3);  // Set first 3 channels to  255
             tex.data[i * 4 + 3] = face->glyph->bitmap.buffer[i];  // Set the alpha value

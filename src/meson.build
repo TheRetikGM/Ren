@@ -12,11 +12,10 @@ ren_inc = include_directories('include', '../include')
 
 glad_proj = subproject('glad')
 glad_dep = glad_proj.get_variable('glad_dep')
-glad_inc = glad_proj.get_variable('glad_inc')
+glad_inc = glad_proj.get_variable('glad_inc') # Should be temporary. For now I provide GLAD includes even to the app using this engine (Ren), so it can run GL functions.
 glfw_dep = dependency('glfw3', fallback : ['glfw', 'glfw_dep'])
 imgui_proj = subproject('imgui')
 imgui_dep = imgui_proj.get_variable('imgui_dep')
-#imgui_inc = imgui_proj.get_variable('imgui_inc')
 
 cc = meson.get_compiler('c')
 if build_machine.system() == 'linux'
