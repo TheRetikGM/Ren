@@ -4,6 +4,7 @@
 #include "Ren/Renderer/OpenGL/Shader.h"
 #include "Ren/Core.h"
 #include "Ren/Renderer/OpenGL/Texture.h"
+#include <list>
 
 namespace Ren
 {
@@ -38,10 +39,19 @@ namespace Ren
         struct QuadSubmission {
             Transform transform;
             Material material;
+            int32_t layer = 0;
         };
-        uint32_t mVBOSize = 250 * 4 * 10 * sizeof(float);  // 250 quads, (4 vertices, 10 floats of shader attributes) per vertex
-        uint32_t mEBOSize = 250 * 6 * sizeof(uint32_t);
-        inline static Renderer2D* mInstance = nullptr;
+        struct RenderPrimitive {
+            std::vector<Vertex> vertices;
+            std::vector<uint32_t> indices;
+            int32_t layer = 0;
+            int32_t used_batch_i = -1;
+        };
+        uint32_t mMaxQuads = 1000;      // Maxmimum number of quads to be rendered in single render pass.
+        uint32_t mVBOSize = mMaxQuads * 4 * sizeof(Vertex);  // 4 vertices per quad
+        uint32_t mEBOSize = mMaxQuads * 6 * sizeof(uint32_t);
+        uint8_t mTexUnitsForUse = 12;       // Number of texture units to be used by user.
+        inline static Renderer2D* msInstance = nullptr;
     public:
         static Renderer2D* GetInstance();
         static void DeleteInstance();
@@ -54,15 +64,15 @@ namespace Ren
 
         void BeginScene(glm::mat4 projection, glm::mat4 view);
         void EndScene();
-        void SubmitQuad(const Transform& trans, const Material& mat);
+        void SubmitQuad(const Transform& trans, const Material& mat, int32_t layer = 0);
         void Render();
         // Return texture batch, in which given texture resides.
         inline const Ref<TextureBatch>& GetTextureBatch(int32_t texture_id) const { return mTextures[mTextureMapping[texture_id].batch_i]; }
         TextureDescriptor GetTextureDescriptor(int32_t texture_id);
     protected:
         Shader mShader;
-        std::vector<Vertex> mVertices;    // Vertices and Indices are used for processing step.
-        std::vector<uint32_t> mIndices;
+        void* mpBuffer;      // Buffer used for temporary storing data, before sent to gpu.
+        std::vector<RenderPrimitive> mPrimitives;
         std::vector<QuadSubmission> mQuadSubmissions;
         Ref<VertexArray> mQuadVAO;
         glm::mat4 mPV;
@@ -74,6 +84,26 @@ namespace Ren
         bool mPreparing;
 
         Renderer2D();
+
+        // ===> Render group optimizations and rendering groups. <=== //
+        // render group represents randge of primitives, witch will be rendered during single render pass.
+        struct render_group { 
+            uint32_t mPrimitives_start, mPrimitives_end; 
+            std::vector<uint32_t> used_batches;
+        };
+        std::list<render_group> mRenderGroups;
+        // Create primitives from QuadSubmissions and batch them together into one buffer.
+        void batchPrimitives();
+        // Sort primitives in corresponding order, based on their layer.
+        void groupByLayers();
+        void groupByMaxTextures();
+        void groupBySize();
+        // Set correct offset of indices for each primitive. Must be done as almost last step,
+        // because if the primitive order changes after this function, then the indices 
+        // will become invalid and inrecoverable.
+        void offsetIndices();
+        // Render all render groups.
+        void renderGroups();
     };
 
 

@@ -109,11 +109,19 @@ RawTexture RawTexture::Load(const char* filename)
 	if (!tex.data)
 		LOG_E("Failed loading raw texture at path: " + std::string(filename));
 
+	tex.mStbiLoaded = true;
 	return tex;
 }
 void RawTexture::Delete()
 {
-	stbi_image_free(data);
+	if (data)
+	{
+		if (mStbiLoaded)
+			stbi_image_free(data);
+		else
+			delete[] data;
+	}
+	mStbiLoaded = false;
 	data = nullptr;
 }
 
@@ -185,8 +193,9 @@ int32_t TextureBatch::AddTexture(const RawTexture& texture)
 	desc.offset = {0.0f, 0.0f};
 	desc.size = {texture.width, texture.height};
 	desc.pTexture = this;
-	desc.descriptor_id = mTextureDescriptors.size();
-	mTextureDescriptors.push_back(desc);
+	desc.descriptor_id = mAvailableID++;
+	desc.ready_for_usage = false;
+	mTextureDescriptors.emplace(desc.descriptor_id, desc);
 
 	// Store in prebuffer. To be later evaluated by the Build() method.
 	prebuf_elem e;
@@ -197,30 +206,51 @@ int32_t TextureBatch::AddTexture(const RawTexture& texture)
 	std::memcpy(e.data_copy, texture.data, texture.width * texture.height * texture.channel_count);
 	mPrebuffer.push_back(e);
 
+
 	// Perform insertion check.
 	if (!SortBySize) 
 	{
-		if (insertToLayerAndSetOffset(0, mPrebuffer.back()))
+		if (insertToLayerAndSetOffset(0, mPrebuffer.back())) 
+		{
+			mDirty = true;
 			return desc.descriptor_id;
+		}
 		else 
 		{
 			delete[] mPrebuffer.back().data_copy;
 			mPrebuffer.pop_back();
-			mTextureDescriptors.pop_back();
+			mTextureDescriptors.erase(mAvailableID--);
 			return -1;
 		}
 	}
 
+	mDirty = true;
 	return desc.descriptor_id;
 }
-void TextureBatch::DeleteTexture(uint32_t id)
+void TextureBatch::DeleteTexture(int32_t id)
 {
-	// REN_ASSERT(id >= 0 && id < mTextureDescriptors.size(), "Invalid descriptor ID.");
-	// mTextureDescriptors.erase(mTextureDescriptors.begin() + id);
+	REN_ASSERT(mTextureDescriptors.count(id) != 0, "Invalid descriptor ID");
+	mTextureDescriptors.erase(id);
+
+	if (!mCreated)
+	{
+		// Delete from prebuffer.
+		auto it = std::find_if(mPrebuffer.begin(), mPrebuffer.end(), [&id](const prebuf_elem& e) { return e.desc_i == id; });
+		if (it != mPrebuffer.end())
+		{
+			if (it->data_copy)
+				delete[] it->data_copy;
+			mPrebuffer.erase(it);
+		}
+	}
+	
+	mDirty = true;
 }
 void TextureBatch::Build()
 {
 	REN_ASSERT(mTextureDescriptors.size() != 0, "0 textures provided");
+	REN_ASSERT(!mCreated, "Batch is already built. For re-build use the Renew() method.");
+	REN_ASSERT(mPrebuffer.size() != 0, "There are 0 textures in prebuffer.");
 
 	if (SortBySize) {
 		// Sort the prebuffed textures by size
@@ -236,7 +266,6 @@ void TextureBatch::Build()
 		}
 	}
 	
-
 	// Get batch texture dimensions.
 	Height = mLayers.back().top_offset + mLayers.back().height;
 	for (auto&& i : mLayers)
@@ -272,6 +301,8 @@ void TextureBatch::Build()
 			createBorder(desc.offset - glm::ivec2(i), desc.size + 2 * glm::ivec2(i));
 
 		delete[] e.data_copy;
+
+		desc.ready_for_usage = true;
 	}
 	mPrebuffer.clear();
 
@@ -290,6 +321,7 @@ void TextureBatch::Build()
 	delete[] mBuffer;
 
 	mCreated = true;
+	mDirty = false;
 }
 
 void TextureBatch::createBorder(glm::ivec2 offset, glm::ivec2 size)
@@ -315,6 +347,44 @@ void TextureBatch::createBorder(glm::ivec2 offset, glm::ivec2 size)
 	// copy right down corner
 	std::memcpy(&mBuffer[buf(offset + size)], &mBuffer[buf(offset + size - glm::ivec2(1))], ChannelCount);
 }
+void TextureBatch::Renew()
+{
+	REN_ASSERT(mCreated, "Cannot renew batch if it was not built yet.");
+	REN_ASSERT(mPrebuffer.size() == 0, "There already are elements in prebuffer. Cannot renew.");
+
+	if (!mDirty)
+		return;
+
+	// Copy texture from GPU memory to RAM and delete the GL texture.
+	RawTexture tex = Utils::GLToRawTexture(*(dynamic_cast<Texture2D*>(this)));
+	this->Delete();		// Delete the texture in GPU memory.
+
+	// Create prebuffer elements from descriptors.
+	for (auto&& [desc_id, desc] : mTextureDescriptors)
+	{
+		prebuf_elem e;
+		e.data_copy = new uint8_t[desc.size.x * desc.size.y * ChannelCount];	// To be deleted in Build() method.
+		e.desc_i = desc_id;
+		e.channel_count = ChannelCount;
+		e.size = desc.size.x  * desc.size.y;
+
+		// Copy each pixel from big texture, which is corresponding to 
+		// this texture into its own prebuffer.
+		for (uint32_t i = 0; i < e.size; i++)
+		{
+			uint32_t pixel_x = desc.offset.x + (i % desc.size.x);
+			uint32_t pixel_y = desc.offset.y + (i / desc.size.x);
+			std::memcpy(&e.data_copy[i * ChannelCount], &tex.data[(pixel_y * desc.size.x + pixel_x) * ChannelCount], ChannelCount);
+		}
+		mPrebuffer.push_back(e);
+	}
+
+	// Re-build the batch.
+	delete tex.data;
+	mCreated = false;
+	Build();
+}
+
 
 /////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// Utils /////////////////////////////////

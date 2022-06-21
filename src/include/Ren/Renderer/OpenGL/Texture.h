@@ -4,6 +4,7 @@
 #include <Ren/Core.h>
 #include <unordered_map>
 #include <tuple>
+#include <unordered_map>
 
 namespace Ren
 {
@@ -40,12 +41,20 @@ namespace Ren
 		void Bind() const;
 	};
 
+	class TextureBatch;
 	struct TextureDescriptor
 	{
 		Texture2D* pTexture = nullptr;
-		uint32_t descriptor_id = 0;
+		int32_t descriptor_id = 0;
 		glm::ivec2 offset = glm::vec2(0.0f);
 		glm::ivec2 size = glm::vec2(0.0f);
+
+		bool is_ready() { return ready_for_usage; }
+
+	private:
+		bool ready_for_usage = false;
+
+		friend class TextureBatch;
 	};
 	struct RawTexture
 	{
@@ -58,6 +67,9 @@ namespace Ren
 		static RawTexture Load(const char* filename);
 		// Free data pointed to by data using STBI
 		void Delete();
+
+		private:
+			bool mStbiLoaded = false;
 	};
 
 	class TextureBatch : public Texture2D
@@ -76,19 +88,19 @@ namespace Ren
 
 		// Add texture into the batch and return its id
 		int32_t AddTexture(const RawTexture& texture);
-		void DeleteTexture(uint32_t id);
+		void DeleteTexture(int32_t id);
 
 		void Build();
 		// Create the batch texture again. Should be used, if new
 		// texture is added after the creation.
 		// Note: Can be time intensive.
-		void Renew() {}
+		void Renew();
 
-		const TextureDescriptor& GetTextureDescriptor(uint32_t id) { return mTextureDescriptors[id]; }
+		const TextureDescriptor& GetTextureDescriptor(int32_t id) { return mTextureDescriptors[id]; }
 
 	protected:
 		struct prebuf_elem {
-			uint32_t desc_i;
+			int32_t desc_i;
 			uint32_t size;
 			uint8_t* data_copy;
 			uint8_t channel_count;
@@ -100,13 +112,16 @@ namespace Ren
 		};
 
 		std::vector<layer> mLayers;
-		std::vector<TextureDescriptor> mTextureDescriptors;
+		int32_t mAvailableID = 0;
+		std::unordered_map<int32_t, TextureDescriptor> mTextureDescriptors;
 		// Buffer for temprarily storing textures, before they are moved to GPU memory.
 		uint8_t* mBuffer = nullptr;
 		// Store texture data, before actually copying it to mBuffer as a final step.
 		std::vector<prebuf_elem> mPrebuffer;
 		// Check if batch is already created --> textures are batched together. 
 		bool mCreated = false;
+		// Check if batch needs recreation.
+		bool mDirty = false;
 		uint32_t mMaxTextureWidth;
 		uint32_t mMaxTextureHeight;
 		uint8_t mTextureMargin = 2;	// Two pixels margin.
