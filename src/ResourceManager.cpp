@@ -28,7 +28,7 @@ Shader& ResourceManager::LoadShader(const char* vShaderFile, const char* fShader
 		}
 		else
 		{
-			resource_group.emplace(name, Resource<Shader>(loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile)));
+			resource_group.emplace(name, Resource<Shader>(Shader::LoadShaderFromFile(vShaderFile, fShaderFile, gShaderFile)));
 			return resource_group[name].obj;
 		}
 	}
@@ -37,6 +37,32 @@ Shader& ResourceManager::LoadShader(const char* vShaderFile, const char* fShader
 		throw std::runtime_error("ResourceManager::LoadShader(): " + std::string(e.what()));
 	}
 }
+Shader& ResourceManager::LoadShader(const char* file_glsl, std::string name, std::string group)
+{
+	try
+	{
+		auto& resource_group = Shaders[group];
+
+		// Create resource or return an already existing one.
+		auto result = resource_group.find(name);
+		if (result != resource_group.end())
+		{
+			// Increase resource instance count.
+			result->second.instance_count++;
+			return result->second.obj;
+		}
+		else
+		{
+			resource_group.emplace(name, Resource<Shader>(Shader::LoadShaderFromFile(file_glsl)));
+			return resource_group[name].obj;
+		}
+	}
+	catch (const std::exception& e)
+	{
+		throw std::runtime_error("ResourceManager::LoadShader(): " + std::string(e.what()));
+	}
+}
+
 Shader& ResourceManager::GetShader(std::string name, std::string group)
 {
 	try
@@ -117,55 +143,6 @@ void ResourceManager::DeleteTexture(std::string name, std::string group)
 	}
 }
 
-Shader ResourceManager::loadShaderFromFile(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile)
-{
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::string geometryCode;
-	try
-	{
-		std::ifstream vertexShaderFile(vShaderFile);
-		std::ifstream fragmentShaderFile(fShaderFile);
-
-		if (!vertexShaderFile.is_open())
-			throw std::runtime_error("Cannot open vertex shader file '" + std::string(vShaderFile) + "'.");
-		if (!fragmentShaderFile.is_open())
-			throw std::runtime_error("Cannot open fragment shader file '" + std::string(fShaderFile) + "'.");
-
-		std::stringstream vShaderStream, fShaderStream;
-		vShaderStream << vertexShaderFile.rdbuf();
-		fShaderStream << fragmentShaderFile.rdbuf();
-
-		vertexShaderFile.close();		
-		fragmentShaderFile.close();
-
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-
-		if (gShaderFile != nullptr)
-		{
-			std::ifstream geometryShaderFile(gShaderFile);
-			if (!geometryShaderFile.is_open())
-				throw std::runtime_error("Cannot open geometry shader file '" + std::string(gShaderFile) + "'.");
-			std::stringstream gShaderStream;
-			gShaderStream << geometryShaderFile.rdbuf();
-			geometryShaderFile.close();
-			geometryCode = gShaderStream.str();
-		}
-	}
-	catch (std::exception& e)
-	{
-		throw std::runtime_error(("Failed to read shader files\n" + std::string(e.what())).c_str());
-	}
-
-	const char* vShaderCode = vertexCode.c_str();
-	const char* fShaderCode = fragmentCode.c_str();
-	const char* gShaderCode = geometryCode.c_str();
-
-	Shader shader;
-	shader.Compile(vShaderCode, fShaderCode, gShaderFile != nullptr ? gShaderCode : nullptr);
-	return shader;
-}
 Texture2D ResourceManager::loadTextureFromFile(const char* file, bool alpha)
 {
 	Texture2D texture;
@@ -177,8 +154,8 @@ Texture2D ResourceManager::loadTextureFromFile(const char* file, bool alpha)
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
 
-	if (!data)
-		throw std::runtime_error(("Could not load texture '" + std::string(file) + "'.").c_str());
+	REN_ASSERT(data != NULL, "Could not load texture '" + std::string(file) + "'.");
+
 	texture.Generate(width, height, data);
 	stbi_image_free(data);
 	return texture;

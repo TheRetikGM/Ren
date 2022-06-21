@@ -5,10 +5,10 @@ ren_renderer_src = files(
     'OpenGL/Framebuffer.cpp',
     'OpenGL/Texture.cpp',
     'OpenGL/Renderbuffer.cpp',
+    'OpenGL/Shader.cpp',
     'Renderer.cpp',
     'BasicRenderer.cpp',
-    'TextRenderer.cpp',
-    'Shader.cpp'
+    'TextRenderer.cpp'
 )
 
 ren_src = [ren_src, ren_renderer_src]

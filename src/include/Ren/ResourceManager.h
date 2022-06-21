@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
-#include "Ren/Renderer/Shader.h"
+#include "Ren/Renderer/OpenGL/Shader.h"
 #include "Renderer/OpenGL/Texture.h"
 
 namespace Ren
@@ -24,6 +24,7 @@ namespace Ren
 		inline static std::unordered_map<std::string, std::unordered_map<std::string, Resource<Texture2D>>> Textures;
 
 		static Shader& 		LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name, std::string group = "");
+		static Shader& 		LoadShader(const char* file_glsl, std::string name, std::string group = "");
 		static Texture2D& 	LoadTexture(const char* file, bool alpha, std::string name, std::string group = "");
 		static Shader& 		GetShader(std::string name, std::string group = "");
 		static Texture2D& 	GetTexture(std::string name, std::string group = "");
@@ -38,7 +39,6 @@ namespace Ren
 		static void Clear();
 	private:
 		ResourceManager() { }
-		static Shader loadShaderFromFile(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile = nullptr);
 		static Texture2D loadTextureFromFile(const char* file, bool alpha);	
 	};
 }

@@ -213,7 +213,11 @@ int32_t TextureBatch::AddTexture(const RawTexture& texture)
 
 	return desc.descriptor_id;
 }
-
+void TextureBatch::DeleteTexture(uint32_t id)
+{
+	// REN_ASSERT(id >= 0 && id < mTextureDescriptors.size(), "Invalid descriptor ID.");
+	// mTextureDescriptors.erase(mTextureDescriptors.begin() + id);
+}
 void TextureBatch::Build()
 {
 	REN_ASSERT(mTextureDescriptors.size() != 0, "0 textures provided");

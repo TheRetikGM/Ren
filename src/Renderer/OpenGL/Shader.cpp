@@ -1,8 +1,10 @@
-#include "Ren/Renderer/Shader.h"
+#include "Ren/Renderer/OpenGL/Shader.h"
+#include "Ren/Core.h"
 #include <glad/glad.h>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 using namespace Ren;
 
@@ -123,27 +125,27 @@ void Shader::SetVec2i(const char* name, const glm::ivec2& value, bool useShader)
 
 void Shader::checkCompileErrors(unsigned int object, std::string type)
 {
-	int success = 0;
+	int compile_success = 0;
 	char infoLog[1024];
 	if (type != "PROGRAM")
 	{
-		glGetShaderiv(object, GL_COMPILE_STATUS, &success);
-		if (!success)
+		glGetShaderiv(object, GL_COMPILE_STATUS, &compile_success);
+		if (!compile_success)
 		{
 			glGetShaderInfoLog(object, 1024, NULL, infoLog);
-			throw std::runtime_error(("| ERROR::SHADER: Compile-time error: Type: " + type + "\n" +
-				infoLog + "\n -- --------------------------------------- --\n").c_str());
+			Logger::LogE("[SHADER]: Compile-time error: Type: " + type + "\n" + infoLog, "", -1);
 		}
+		REN_ASSERT(compile_success, "Shader compilation failed.");
 	}
 	else
 	{
-		glGetProgramiv(object, GL_LINK_STATUS, &success);
-		if (!success)
+		glGetProgramiv(object, GL_LINK_STATUS, &compile_success);
+		if (!compile_success)
 		{
 			glGetProgramInfoLog(object, 1024, NULL, infoLog);
-			throw std::runtime_error(("| ERROR::SHADER: Link-time error: Type: " + type + "\n" +
-				infoLog + "\n -- --------------------------------------- --\n").c_str());
+			Logger::LogE("[SHADER]: Link-time error: Type: " + type + "\n" + infoLog, "", -1);
 		}
+		REN_ASSERT(compile_success, "Shader compilation failed.");
 	}
 }
 
@@ -156,12 +158,15 @@ Shader Shader::LoadShaderFromFile(const char* vShaderFile, const char* fShaderFi
 	{
 		std::ifstream vertexShaderFile(vShaderFile);
 		std::ifstream fragmentShaderFile(fShaderFile);
-		std::stringstream vShaderStream, fShaderStream;
 
+		REN_ASSERT(vertexShaderFile.is_open(), "Cannot open vertex shader file '" + std::string(vShaderFile) + "'.");
+		REN_ASSERT(fragmentShaderFile.is_open(), "Cannot open fragment shader file '" + std::string(fShaderFile) + "'.");
+
+		std::stringstream vShaderStream, fShaderStream;
 		vShaderStream << vertexShaderFile.rdbuf();
 		fShaderStream << fragmentShaderFile.rdbuf();
 
-		vertexShaderFile.close();
+		vertexShaderFile.close();		
 		fragmentShaderFile.close();
 
 		vertexCode = vShaderStream.str();
@@ -170,6 +175,7 @@ Shader Shader::LoadShaderFromFile(const char* vShaderFile, const char* fShaderFi
 		if (gShaderFile != nullptr)
 		{
 			std::ifstream geometryShaderFile(gShaderFile);
+			REN_ASSERT(geometryShaderFile.is_open(), "Cannot open geometry shader file '" + std::string(gShaderFile) + "'.");
 			std::stringstream gShaderStream;
 			gShaderStream << geometryShaderFile.rdbuf();
 			geometryShaderFile.close();
@@ -189,3 +195,40 @@ Shader Shader::LoadShaderFromFile(const char* vShaderFile, const char* fShaderFi
 	shader.Compile(vShaderCode, fShaderCode, gShaderFile != nullptr ? gShaderCode : nullptr);
 	return shader;
 }
+Shader Shader::LoadShaderFromFile(const char* filename_glsl)
+{
+    std::ifstream ifs(filename_glsl);
+    REN_ASSERT(ifs.is_open(), "Cannot open shader file '" + std::string(filename_glsl) + "'");
+
+    std::stringstream stream;
+    stream << ifs.rdbuf();
+
+	// Split file into individual parts with '@' as a delimiter character.
+	// Like this, the word witch was after '@' character, will be on first line.
+    std::vector<std::string> parts;
+    std::string str;
+    while (std::getline(stream, str, '@'))
+        if (!str.empty() && str.find("#version") != std::string::npos)
+            parts.push_back(str);
+    
+
+	// Assign inidivual parts to the sources. Also remove the first line, which identifies the shader type.
+    const char* vertex_source = nullptr;
+    const char* geometry_source = nullptr;
+    const char* fragment_source = nullptr;
+    for (auto&& part : parts)
+    {
+        std::string first_line = part.substr(0, part.find_first_of('\n') + 1);
+
+        if (first_line.find("vertex") != std::string::npos)
+            vertex_source = part.erase(0, part.find_first_of('\n') + 1).c_str();
+        else if (first_line.find("geometry") != std::string::npos)
+            geometry_source = part.erase(0, part.find_first_of('\n') + 1).c_str();
+        else if (first_line.find("fragment") != std::string::npos)
+            fragment_source = part.erase(0, part.find_first_of('\n') + 1).c_str();
+    }
+
+	Shader shader;
+	shader.Compile(vertex_source, fragment_source, geometry_source);
+	return shader;
+}	

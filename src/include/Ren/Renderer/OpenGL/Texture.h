@@ -76,11 +76,12 @@ namespace Ren
 
 		// Add texture into the batch and return its id
 		int32_t AddTexture(const RawTexture& texture);
-		void DeleteTexture(uint32_t id) {}
+		void DeleteTexture(uint32_t id);
 
 		void Build();
 		// Create the batch texture again. Should be used, if new
 		// texture is added after the creation.
+		// Note: Can be time intensive.
 		void Renew() {}
 
 		const TextureDescriptor& GetTextureDescriptor(uint32_t id) { return mTextureDescriptors[id]; }

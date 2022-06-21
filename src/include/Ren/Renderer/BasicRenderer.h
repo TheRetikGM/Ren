@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 #include <vector>
-#include "Ren/Renderer/Shader.h"
+#include "Ren/Renderer/OpenGL/Shader.h"
 
 namespace Ren
 {

@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "Ren/Renderer/OpenGL/Texture.h"
-#include "Ren/Renderer/Shader.h"
+#include "Ren/Renderer/OpenGL/Shader.h"
 
 namespace Ren
 {

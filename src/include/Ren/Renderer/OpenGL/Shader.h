@@ -16,6 +16,7 @@ namespace Ren
         const Shader& Use() const;
 
         static Shader LoadShaderFromFile(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile = nullptr);
+        static Shader LoadShaderFromFile(const char* filename_glsl);
         void Compile(const char* vertexSource, const char* fragmentSource, const char* geometrySource = nullptr);
 
         void SetFloat(const char* name, float value, bool useShader = false) const;

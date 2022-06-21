@@ -43,7 +43,7 @@ Renderer2D::Renderer2D()
     mQuadVAO = VertexArray::Create();
     mQuadVAO->AddVertexBuffer(vbo).SetElementBuffer(ebo);
 
-    mShader = ResourceManager::LoadShader(ENGINE_SHADERS_DIR "renderer2d.vert", ENGINE_SHADERS_DIR "renderer2d.frag", nullptr, RESOURCE_GROUP);
+    mShader = ResourceManager::LoadShader(ENGINE_SHADERS_DIR "renderer2d.glsl", RESOURCE_GROUP);
     mShader.Use();
     for (uint32_t i = 0; i < 12; i++)
         mShader.SetInt(("uTextures[" + std::to_string(i) + "]").c_str(), i);

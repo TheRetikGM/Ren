@@ -46,7 +46,7 @@ void GameCore::InitEngine()
 {
 	pixel_projection = glm::ortho(0.0f, float(Width), float(Height), 0.0f, 0.0f, -1.0f);
 	Shader& basic = ResourceManager::LoadShader(ENGINE_SHADERS_DIR "BasicRender.vert", ENGINE_SHADERS_DIR "BasicRender.frag", nullptr, "basic", RESOURCE_GROUP);
-	ResourceManager::LoadShader(ENGINE_SHADERS_DIR "normals.vert", ENGINE_SHADERS_DIR "normals.frag", nullptr, "normal", RESOURCE_GROUP);
+	ResourceManager::LoadShader(ENGINE_SHADERS_DIR "normals.glsl", "normal", RESOURCE_GROUP);
 
 	// Set projection.
 	basic.Use().SetMat4("projection", pixel_projection);

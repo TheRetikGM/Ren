@@ -1,7 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include "GameLauncher.h"
-#include "Ren/Renderer/Shader.h"
+#include "Ren/Renderer/OpenGL/Shader.h"
 #include "config.h"
 #include "ResourceManager.h"
 #include "Helper.hpp"

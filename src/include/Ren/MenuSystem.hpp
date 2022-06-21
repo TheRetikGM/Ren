@@ -6,7 +6,7 @@
 #include <any>
 #include <stdexcept>
 #include "Ren/Renderer/OpenGL/Texture.h"
-#include "Ren/Renderer/Shader.h"
+#include "Ren/Renderer/OpenGL/Shader.h"
 #include "AtlasTextRenderer.hpp"
 #include "Renderer/SpriteRenderer.h"
 #include "Helper.hpp"   // Only for debugging. Not needed.
