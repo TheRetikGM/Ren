@@ -90,6 +90,8 @@ Vertex quad_vertices[4] = {
 };
 void Renderer2D::Render()
 {
+    if (mQuadSubmissions.size() == 0)
+        return;
     batchPrimitives();
     groupByLayers();
     groupByMaxTextures();
@@ -156,27 +158,6 @@ void Renderer2D::groupByLayers()
     });
 
     mRenderGroups.push_back(render_group{0, uint32_t(mPrimitives.size() - 1)});
-    // int32_t num = mPrimitives[0].layer;
-    // mRenderGroups.push_back(render_group{});
-    // for (int i = 0; i < mPrimitives.size(); i++)
-    //     if (num != mPrimitives[i].layer) {
-    //         mRenderGroups.push_back(render_group{});
-    //         num = mPrimitives[i].layer;
-    //     }
-
-    // uint32_t current_group_index = 0;
-    // num = mPrimitives[0].layer;
-    // for (uint32_t i = 0; i < mPrimitives.size(); i++)
-    // {
-    //     RenderPrimitive& p = mPrimitives[i];
-    //     if (p.layer > num)
-    //     {
-    //         mRenderGroups[current_group_index].mPrimitives_end = i - 1;
-    //         mRenderGroups[++current_group_index].mPrimitives_start = i;
-    //         num = p.layer;
-    //     }
-    // }
-    // mRenderGroups[current_group_index].mPrimitives_end = mPrimitives.size() - 1;
 }
 void Renderer2D::groupByMaxTextures()
 {

@@ -22,7 +22,7 @@ namespace Ren
     {
     public:
         std::map<char, Character> Characters;
-        unsigned int RowSpacing;
+        unsigned int RowSpacing = 20;
 
         ~TextRenderer();
         static Ref<TextRenderer> Create() { return Ref<TextRenderer>(new TextRenderer()); }

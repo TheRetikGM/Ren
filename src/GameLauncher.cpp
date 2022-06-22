@@ -74,6 +74,8 @@ void GameLauncher::Launch()
             RenderAPI::SetClearColor(glm::vec4(game_instance->BackgroundColor, 1.0f));
             RenderAPI::Clear();
             game_instance->Render();
+            if (ImGuiFrameHandler)
+                ImGuiFrameHandler();
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -190,7 +192,7 @@ void GameLauncher::end()
 
 void Ren::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	glViewport(0, 0, width, height);
+	RenderAPI::SetViewport({0, 0}, {width, height});
 	GameLauncher::game_instance->Width = width;
 	GameLauncher::game_instance->Height = height;
 	GameLauncher::game_instance->OnResize();

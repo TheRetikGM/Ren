@@ -16,14 +16,17 @@ namespace Ren
         float rotation = 0.0f;
 
         glm::mat4 getModelMatrix();
+        Transform(glm::vec2 position, glm::vec2 scale, float rotation = 0.0f) : position(position), scale(scale), rotation(rotation) {}
+        Transform() = default;
     };
     struct Material
     {
         glm::vec4 color = glm::vec4(0.0f);
         int32_t texture_id = -1;
 
-        bool hasColor();
-        bool hasTexture();
+        Material(glm::vec4 color, int32_t texture_id = -1) : color(color), texture_id(texture_id) {}
+        Material(glm::vec3 color, int32_t texture_id = -1) : color(glm::vec4(color, 1.0f)), texture_id(texture_id) {}
+        Material() = default;
     };
     
     struct Vertex 
@@ -69,6 +72,12 @@ namespace Ren
         // Return texture batch, in which given texture resides.
         inline const Ref<TextureBatch>& GetTextureBatch(int32_t texture_id) const { return mTextures[mTextureMapping[texture_id].batch_i]; }
         TextureDescriptor GetTextureDescriptor(int32_t texture_id);
+
+        inline uint32_t GetPrimitiveCount() { return mPrimitives.size(); }
+        inline uint32_t GetVertexCount() { return mPrimitives.size() * 4; }
+        inline uint32_t GetIndexCount() { return mPrimitives.size() * 6; }
+        inline uint32_t GetTextureCount() { return mTextureMapping.size(); }
+        inline uint32_t GetBatchCount() { return mTextures.size(); }
     protected:
         Shader mShader;
         void* mpBuffer;      // Buffer used for temporary storing data, before sent to gpu.

@@ -82,6 +82,7 @@ void TextRenderer::Load(std::string font, unsigned int font_size)
     FT_Done_FreeType(ft);
 
     this->mFontSize = font_size;
+    this->RowSpacing = int(0.5f * this->Characters.at('H').size.y);
 }
 void TextRenderer::RenderText(std::string text, float x, float y, float scale, glm::vec3 color) const
 {

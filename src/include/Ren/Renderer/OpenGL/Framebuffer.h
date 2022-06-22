@@ -53,6 +53,7 @@ namespace Ren
         unsigned int ID = 0;
         std::vector<Ref<FramebufferAttachment>> Attachments;
         bool PreserveFBOBinding = true;
+        bool AutoViewport = true;
 
         glm::uvec2 Size = glm::uvec2(0, 0);
         unsigned int& Width = Size.x;
@@ -64,7 +65,7 @@ namespace Ren
         Framebuffer& Generate(unsigned int width, unsigned int height);
         Framebuffer& Bind();
         Framebuffer& Unbind();
-        Framebuffer& Clear(glm::vec3 vClearColor = glm::vec3(0.0f));
+        Framebuffer& Clear(glm::vec4 vClearColor = glm::vec4(0.0f));
         Framebuffer& Resize(unsigned int new_width, unsigned int new_height);
         unsigned int GetColorAttachmentID(int nColorAttachment) { return *mColorBufferBindings[nColorAttachment]; }
         void Delete();
@@ -84,6 +85,8 @@ namespace Ren
         unsigned int nMaxAttachments = -1;
         std::string sError = "";
         std::unordered_map<int, unsigned int*> mColorBufferBindings;
+        glm::ivec2 mViewportOffset_backup = glm::vec2(0.0f);
+        glm::ivec2 mViewportSize_backup = glm::vec2(0.0f);
 
         // 1/ Atleast ONE color attachment.
         // 2/ All attachments have the same size as Size.

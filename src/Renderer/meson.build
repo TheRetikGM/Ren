@@ -8,7 +8,8 @@ ren_renderer_src = files(
     'OpenGL/Shader.cpp',
     'Renderer.cpp',
     'BasicRenderer.cpp',
-    'TextRenderer.cpp'
+    'TextRenderer.cpp',
+    'SpriteRenderer.cpp'
 )
 
 ren_src = [ren_src, ren_renderer_src]

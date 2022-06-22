@@ -4,6 +4,7 @@
 #include "InputInterface.hpp"
 #include "Renderer/BasicRenderer.h"
 #include "Renderer/TextRenderer.h"
+#include "Renderer/SpriteRenderer.h"
 #include "Renderer/Renderer.h"
 #include <memory>
 
@@ -46,6 +47,7 @@ namespace Ren
 	protected:
 		Ref<BasicRenderer> basic_renderer;
 		Ref<TextRenderer> text_renderer;
+		Ref<SpriteRenderer> sprite_renderer;
 		Renderer2D* renderer_2d = nullptr;
 
 		// ===== State variables =====

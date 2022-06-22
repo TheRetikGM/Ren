@@ -21,6 +21,7 @@ namespace Ren
     public:
         // Dear ImGui theme.
         ImGuiTheme GuiTheme = ImGuiTheme::dark;
+        void (*ImGuiFrameHandler)() = nullptr;
 
         GameLauncher(GameCore* instance);
         ~GameLauncher() {}

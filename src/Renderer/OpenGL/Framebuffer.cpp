@@ -1,31 +1,32 @@
 #include "Ren/Renderer/OpenGL/Framebuffer.h"
 #include "Ren/Logger.hpp"
+#include "Ren/Renderer/OpenGL/RenderAPI.h"
 
 using namespace Ren;
 
-enum class BufferUsage: int {
+enum class AttachmentUsage: int {
     COLOR = GL_COLOR_ATTACHMENT0,
     DEPTH = GL_DEPTH_ATTACHMENT,
     STENCIL = GL_STENCIL_ATTACHMENT,
     DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT
 };
 
-BufferUsage getBufferUsage(AttachmentFormats format)
+AttachmentUsage getAttachmentUsage(AttachmentFormats format)
 {
     switch (format)
     {
     case AttachmentFormats::RGB:
     case AttachmentFormats::RGBA:
     case AttachmentFormats::RED:
-        return BufferUsage::COLOR;
+        return AttachmentUsage::COLOR;
     case AttachmentFormats::DEPTH24_STENCIL8:
-        return BufferUsage::DEPTH_STENCIL;
+        return AttachmentUsage::DEPTH_STENCIL;
     case AttachmentFormats::DEPTH_COMPONENT24:
-        return BufferUsage::DEPTH;
+        return AttachmentUsage::DEPTH;
     case AttachmentFormats::STENCIL_INDEX8:
-        return BufferUsage::STENCIL;
+        return AttachmentUsage::STENCIL;
     default:
-        return BufferUsage::COLOR;
+        return AttachmentUsage::COLOR;
     }
 }
 
@@ -33,10 +34,10 @@ void FramebufferAttachment::Attach(int nColorAttachment)
 {
     this->nColorAttachment = nColorAttachment;
 
-    BufferUsage usage = getBufferUsage(internalFormat);
+    AttachmentUsage usage = getAttachmentUsage(internalFormat);
 
     int attachment = (int)usage;
-    if (usage == BufferUsage::COLOR)
+    if (usage == AttachmentUsage::COLOR)
         attachment += nColorAttachment;
 
     if (storageType == StorageType::TEXTURE)
@@ -142,7 +143,7 @@ Framebuffer& Framebuffer::Generate(unsigned int width, unsigned int height)
     for (int i = 0, nColorAttachmentsTotal = 0; i < int(Attachments.size()); i++)
     {
         int nColorAttachment = -1;  // Default no color attachment.
-        if (getBufferUsage(Attachments[i]->internalFormat) == BufferUsage::COLOR) 
+        if (getAttachmentUsage(Attachments[i]->internalFormat) == AttachmentUsage::COLOR) 
         {
             nColorAttachment = nColorAttachmentsTotal++;
             mColorBufferBindings[nColorAttachment] = &Attachments[i]->bufferID;
@@ -164,12 +165,21 @@ Framebuffer& Framebuffer::Bind()
     if (PreserveFBOBinding)
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)(&nFbBackupID));
     glBindFramebuffer(GL_FRAMEBUFFER, ID);
+    if (AutoViewport)
+    {
+        RenderAPI::GetViewport(mViewportOffset_backup, mViewportSize_backup);
+        RenderAPI::SetViewport({0, 0}, {Width, Height});
+    }
     return *this;
 }
 Framebuffer& Framebuffer::Unbind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, nFbBackupID);
     nFbBackupID = 0;
+
+    if (AutoViewport)
+        RenderAPI::SetViewport(mViewportOffset_backup, mViewportSize_backup);
+
     return *this;
 }
 Framebuffer& Framebuffer::Resize(unsigned int new_width, unsigned int new_height)
@@ -195,7 +205,7 @@ bool Framebuffer::checkFramebufferValidity(glm::uvec2 size)
             sError = "One or more attachments have different sizes.";
             return false;
         }
-        nColorAttachments += int(getBufferUsage(a->internalFormat) == BufferUsage::COLOR);
+        nColorAttachments += int(getAttachmentUsage(a->internalFormat) == AttachmentUsage::COLOR);
     }
 
     if (nColorAttachments == 0)
@@ -206,10 +216,10 @@ bool Framebuffer::checkFramebufferValidity(glm::uvec2 size)
     
     return true;
 }
-Framebuffer& Framebuffer::Clear(glm::vec3 vClearColor)
+Framebuffer& Framebuffer::Clear(glm::vec4 vClearColor)
 {
-    glClearColor(vClearColor.x, vClearColor.y, vClearColor.z, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    RenderAPI::SetClearColor(vClearColor);
+    RenderAPI::Clear();
     return *this;
 }
 void Framebuffer::Delete()
