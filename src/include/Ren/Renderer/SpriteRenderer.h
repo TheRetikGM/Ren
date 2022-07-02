@@ -3,7 +3,7 @@
 #include "Ren/Renderer/OpenGL/Texture.h"
 #include <glm/glm.hpp>
 
-namespace Ren
+namespace Ren::Legacy
 {
 	class SpriteRenderer
 	{

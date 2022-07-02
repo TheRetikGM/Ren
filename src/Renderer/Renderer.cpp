@@ -20,7 +20,7 @@ void Renderer::Submit(const Ref<VertexArray>& vao)
 //////////////////////////////////////
 //////////// Renderer2D //////////////
 //////////////////////////////////////
-glm::mat4 Transform::getModelMatrix()
+glm::mat4 Renderer2D::Transform::getModelMatrix()
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(position, 0.0));
@@ -82,12 +82,6 @@ void Renderer2D::SubmitQuad(const Transform& trans, const Material& mat, int32_t
 {
     mQuadSubmissions.push_back({ trans, mat, layer });
 }
-Vertex quad_vertices[4] = {
-    { {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
-    { {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f} },
-    { {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f} },
-    { {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f} },	
-};
 void Renderer2D::Render()
 {
     if (mQuadSubmissions.size() == 0)
@@ -101,6 +95,12 @@ void Renderer2D::Render()
 }
 void Renderer2D::batchPrimitives()
 {
+    const static Renderer2D::Vertex quad_vertices[4] = {
+        { {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f} },
+        { {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f} },
+        { {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f} },
+        { {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f} },	
+    };
     // Create primitives from rendering submissions.
     // TODO: optimizations like: frustrum culling, merging vertices etc.
     for (auto& quad_sub : mQuadSubmissions)

@@ -6,6 +6,7 @@
 #define RESOURCE_GROUP "__engine"
 
 using namespace Ren;
+using SpriteRenderer = Legacy::SpriteRenderer;
 
 GameCore::GameCore(unsigned int width, unsigned int height) 
 	: Keys(), KeysProcessed()

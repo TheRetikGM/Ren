@@ -8,37 +8,39 @@
 
 namespace Ren
 {
-    struct Transform
-    {
-        glm::vec2 position;
-        glm::vec2 scale;
-        // Rotation in degrees.
-        float rotation = 0.0f;
-
-        glm::mat4 getModelMatrix();
-        Transform(glm::vec2 position, glm::vec2 scale, float rotation = 0.0f) : position(position), scale(scale), rotation(rotation) {}
-        Transform() = default;
-    };
-    struct Material
-    {
-        glm::vec4 color = glm::vec4(0.0f);
-        int32_t texture_id = -1;
-
-        Material(glm::vec4 color, int32_t texture_id = -1) : color(color), texture_id(texture_id) {}
-        Material(glm::vec3 color, int32_t texture_id = -1) : color(glm::vec4(color, 1.0f)), texture_id(texture_id) {}
-        Material() = default;
-    };
-    
-    struct Vertex 
-    {
-        glm::vec3 position;
-        glm::vec2 tex_coords;
-        float tex_index = -1.0f;
-        glm::vec4 color = glm::vec4(1.0f);
-    };
+    typedef int32_t TextureID;
 
     class Renderer2D
     {
+    public:
+        struct Transform
+        {
+            glm::vec2 position;
+            glm::vec2 scale;
+            // Rotation in degrees.
+            float rotation = 0.0f;
+
+            glm::mat4 getModelMatrix();
+            Transform(glm::vec2 position, glm::vec2 scale, float rotation = 0.0f) : position(position), scale(scale), rotation(rotation) {}
+            Transform() = default;
+        };
+        struct Material
+        {
+            glm::vec4 color = glm::vec4(0.0f);
+            TextureID texture_id = -1;
+
+            Material(glm::vec4 color, TextureID texture_id = -1) : color(color), texture_id(texture_id) {}
+            Material(glm::vec3 color, TextureID texture_id = -1) : color(glm::vec4(color, 1.0f)), texture_id(texture_id) {}
+            Material() = default;
+        };
+    private:
+        struct Vertex 
+        {
+            glm::vec3 position;
+            glm::vec2 tex_coords;
+            float tex_index = -1.0f;
+            glm::vec4 color = glm::vec4(1.0f);
+        };
         struct QuadSubmission {
             Transform transform;
             Material material;
@@ -61,7 +63,7 @@ namespace Ren
 
         // For now, will clear all resources.
         void BeginPrepare();
-        int32_t PrepareTexture(const RawTexture& texture);  // Prepare texture for rendering. Should be done as preprocessing step;
+        TextureID PrepareTexture(const RawTexture& texture);  // Prepare texture for rendering. Should be done as preprocessing step;
         void EndPrepare();
         void ClearResources();
 
@@ -70,8 +72,8 @@ namespace Ren
         void SubmitQuad(const Transform& trans, const Material& mat, int32_t layer = 0);
         void Render();
         // Return texture batch, in which given texture resides.
-        inline const Ref<TextureBatch>& GetTextureBatch(int32_t texture_id) const { return mTextures[mTextureMapping[texture_id].batch_i]; }
-        TextureDescriptor GetTextureDescriptor(int32_t texture_id);
+        inline const Ref<TextureBatch>& GetTextureBatch(TextureID texture_id) const { return mTextures[mTextureMapping[texture_id].batch_i]; }
+        TextureDescriptor GetTextureDescriptor(TextureID texture_id);
 
         inline uint32_t GetPrimitiveCount() { return mPrimitives.size(); }
         inline uint32_t GetVertexCount() { return mPrimitives.size() * 4; }

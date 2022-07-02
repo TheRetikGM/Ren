@@ -47,7 +47,7 @@ namespace Ren
 	protected:
 		Ref<BasicRenderer> basic_renderer;
 		Ref<TextRenderer> text_renderer;
-		Ref<SpriteRenderer> sprite_renderer;
+		Ref<Legacy::SpriteRenderer> sprite_renderer;
 		Renderer2D* renderer_2d = nullptr;
 
 		// ===== State variables =====

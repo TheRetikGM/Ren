@@ -1,7 +1,7 @@
 #pragma once
 #include "Scene.hpp"
 
-namespace Ren
+namespace Ren::ecs
 {
     // SceneView is an object, that is used for iterating through the scene.
     // For example we could iterate only through entities that have certain components attached etc.

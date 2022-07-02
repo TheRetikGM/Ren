@@ -106,10 +106,10 @@ void TextRenderer::RenderText(std::string text, float x, float y, float scale, g
         float w = ch.size.x * scale;
         float h = ch.size.y * scale;
 
-        Transform t;
+        Renderer2D::Transform t;
         t.position = glm::vec2(xpos, ypos);
         t.scale = glm::vec2(w, h);
-        Material m;
+        Renderer2D::Material m;
         m.color = glm::vec4(color, 1.0f);
         m.texture_id = ch.texture_id;
 

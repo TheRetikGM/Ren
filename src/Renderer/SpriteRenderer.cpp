@@ -1,7 +1,7 @@
 #include "Ren/Renderer/SpriteRenderer.h"
 #include <glad/glad.h>
 
-using namespace Ren;
+using namespace Ren::Legacy;
 
 SpriteRenderer::SpriteRenderer(Shader shader)
 {

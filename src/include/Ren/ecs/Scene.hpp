@@ -5,7 +5,7 @@
 #include <tuple>    // std::tuple, std::make_tuple
 #include "Ren/Core.h"   // Ref
 
-namespace Ren
+namespace Ren::ecs
 {
     typedef uint64_t EntityID;
     typedef uint32_t EntityIndex;
