@@ -9,6 +9,8 @@
 namespace Ren
 {
     typedef int32_t TextureID;
+    typedef int32_t Layer;
+    #define TEXTURE_NONE TextureID(-1)
 
     class Renderer2D
     {
@@ -44,12 +46,12 @@ namespace Ren
         struct QuadSubmission {
             Transform transform;
             Material material;
-            int32_t layer = 0;
+            Layer layer = 0;
         };
         struct RenderPrimitive {
             std::vector<Vertex> vertices;
             std::vector<uint32_t> indices;
-            int32_t layer = 0;
+            Layer layer = 0;
             int32_t used_batch_i = -1;
         };
         uint32_t mMaxQuads = 1000;      // Maxmimum number of quads to be rendered in single render pass.
@@ -63,7 +65,10 @@ namespace Ren
 
         // For now, will clear all resources.
         void BeginPrepare();
-        TextureID PrepareTexture(const RawTexture& texture);  // Prepare texture for rendering. Should be done as preprocessing step;
+        // Prepare texture for rendering. Should be done as preprocessing step;
+        TextureID PrepareTexture(const RawTexture& texture); 
+        // Remove prepared texture.
+        void RemoveTexture(TextureID id);
         void EndPrepare();
         void ClearResources();
 
@@ -89,7 +94,7 @@ namespace Ren
         glm::mat4 mPV;
 
         // Textures
-        struct batch_tex_desc { uint32_t batch_i, desc_i; };
+        struct batch_tex_desc { uint32_t batch_i, desc_i; TextureID texture_id = TEXTURE_NONE; }; // Include texture_id as well, to check for deleted textures.
         std::vector<batch_tex_desc> mTextureMapping;    // Mapping of texture IDs to their corresponding batch and texture descriptor.
         std::vector<Ref<TextureBatch>> mTextures;
         bool mPreparing;

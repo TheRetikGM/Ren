@@ -282,8 +282,27 @@ int32_t Renderer2D::PrepareTexture(const RawTexture& texture)
         batch_i = mTextures.size() - 1;
     }
 
-    mTextureMapping.push_back({ batch_i, (uint32_t)desc_i });
-    return int32_t(mTextureMapping.size() - 1);
+    mTextureMapping.push_back({ batch_i, (uint32_t)desc_i, TextureID(mTextureMapping.size()) });
+    return mTextureMapping.back().texture_id;
+}
+void Renderer2D::RemoveTexture(TextureID id)
+{
+    REN_ASSERT(id != TEXTURE_NONE && id >= 0 && id <= mTextureMapping.size(), "Invalid texture ID");
+
+    // Just remove texture from batch.
+    batch_tex_desc& tex_desc = mTextureMapping[id];
+    REN_ASSERT(tex_desc.texture_id == id, "Trying to delete already deleted texture (id = " + std::to_string(id) + ").");
+    mTextures[tex_desc.batch_i]->DeleteTexture(tex_desc.desc_i);
+
+    if (!mPreparing)
+    {
+        LOG_W("Removing texture after Renderer2D::EndPrepare(). This can have significant impact on performance, as we have to recreate the batch texture.");
+        mTextures[tex_desc.batch_i]->Renew();
+    }
+
+    tex_desc.batch_i = uint32_t(-1);
+    tex_desc.desc_i = uint32_t(-1);
+    tex_desc.texture_id = TEXTURE_NONE;
 }
 void Renderer2D::EndPrepare()
 {
@@ -301,8 +320,9 @@ void Renderer2D::ClearResources()
     mTextureMapping.clear();
     mTextures.clear();
 }
-TextureDescriptor Renderer2D::GetTextureDescriptor(int32_t texture_id)
+TextureDescriptor Renderer2D::GetTextureDescriptor(TextureID texture_id)
 {
     batch_tex_desc mapping_desc = mTextureMapping[texture_id];
+    REN_ASSERT(mapping_desc.texture_id == texture_id, "Trying to access deleted texture (id = " + std::to_string(texture_id) + ").");
     return mTextures[mapping_desc.batch_i]->GetTextureDescriptor(mapping_desc.desc_i);
 }

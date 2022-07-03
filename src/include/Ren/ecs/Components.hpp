@@ -3,6 +3,9 @@
 #include <string>
 #include <Ren/Renderer/Renderer.h>
 #include <Ren/InputInterface.hpp>
+#include <vector>             // std::vector
+#include <unordered_map>
+#include "SceneView.hpp"    // Scene, SceneView
 
 
 /*
@@ -11,33 +14,50 @@
 
 namespace Ren::ecs
 {
+    class ScriptBehavior
+    {
+    public:
+        virtual ~ScriptBehavior() {}
+        virtual void Init() {};
+        virtual void Destroy() {};
+        virtual void ProcessInput(InputInterface* input) {};
+        virtual void Update(float dt) {};
+    protected:
+        Scene* mpActiveScene{ nullptr };
+        EntityID mEntityID = INVALID_ENTITY;
+
+        template<typename TComponent>
+        inline TComponent* get()
+        {
+            REN_ASSERT(mEntityID != INVALID_ENTITY && mpActiveScene, "Entity ID is invalid or no scene is associated.");
+            return mpActiveScene->Get<TComponent>(mEntityID);
+        }      
+
+        friend class ScriptSystem;
+    };
+};
+
+namespace Ren::ecs::components
+{
     struct Transform2D
     {
         glm::vec2 position{ 0.0f, 0.0f }, scale{ 0.0f, 0.0f };
         float rotation{ 0.0f };
+        Layer layer{ 0 };
     };
 
     struct SpriteRenderer
     {
-        std::string image_path{ "none" };
-        TextureID tex_id{ -1 };
+        std::string image_path = IMAGE_NONE;
+        TextureID tex_id = TEXTURE_NONE;
         glm::vec3 color{ 1.0f, 1.0f, 1.0f };
+        const inline static std::string IMAGE_NONE = "none";
     };
 
-    // TODO: System manager
-    // - Will manage all systems, meaning creation of new systems, updating etc, threading ...
-
-    class System
+    struct Script
     {
-    public:
-        virtual void ProcessInput(InputInterface* input) = 0;
-        virtual void Update(float dt) = 0;
-        virtual void Render() = 0;
+        std::vector<ScriptBehavior*> scripts;
 
-    };
-    class RenderSystem
-    {
-    public:
-
+        inline void Add(ScriptBehavior* script) { scripts.push_back(script); }
     };
 };

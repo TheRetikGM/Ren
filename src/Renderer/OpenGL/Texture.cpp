@@ -106,8 +106,7 @@ RawTexture RawTexture::Load(const char* filename)
 	RawTexture tex;
 	tex.data = stbi_load(filename, (int*)&tex.width, (int*)&tex.height, (int*)&tex.channel_count, 0);
 
-	if (!tex.data)
-		LOG_E("Failed loading raw texture at path: " + std::string(filename));
+	REN_ASSERT(tex.data, "Failed loading raw texture at path: " + std::string(filename));
 
 	tex.mStbiLoaded = true;
 	return tex;

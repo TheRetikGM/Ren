@@ -31,7 +31,7 @@ namespace Ren::ecs
             return s_component_id;
         }
     }
-    #define INVALID_ENTITY CreateEntityID(EntityIndex(-1), 0)
+    #define INVALID_ENTITY Utils::CreateEntityID(EntityIndex(-1), 0)
 
     // Component pool, which will hold data for each entity.
     // For now, each component pool will allocate MAX_COMPONENTS worth of memory for each component type.
