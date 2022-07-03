@@ -129,6 +129,11 @@ namespace Ren::ecs
             
             return static_cast<TComponent*>(mComponentPools[component_id]->get(Utils::GetEntityIndex(id)));
         }
+        template<typename... TComponents>
+        std::tuple<TComponents*...> GetMultiple(EntityID id)
+        {
+            return std::make_tuple(Get<TComponents>(id)...);
+        }
         // Remove component from given entity.
         template<typename TComponent>
         void Remove(EntityID id)
