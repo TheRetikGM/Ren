@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <Ren/Renderer/Renderer.h>
+#include <Ren/InputInterface.hpp>
+
 
 /*
 *  This file defines some basic commonly used components.
@@ -24,4 +26,18 @@ namespace Ren::ecs
 
     // TODO: System manager
     // - Will manage all systems, meaning creation of new systems, updating etc, threading ...
+
+    class System
+    {
+    public:
+        virtual void ProcessInput(InputInterface* input) = 0;
+        virtual void Update(float dt) = 0;
+        virtual void Render() = 0;
+
+    };
+    class RenderSystem
+    {
+    public:
+
+    };
 };
