@@ -3,9 +3,8 @@ directory = imgui-1.87
 url = https://github.com/ocornut/imgui
 revision = 9764adc7bb7a582601dd4dd1c34d4fa17ab5c8e8
 patch_filename = imgui_1.87-3_patch.zip
-patch_url = https://wrapdb.mesonbuild.com/v2/imgui_1.87-3/get_patch
-patch_hash = daedd65150ad24667190f915267515f36da68e46724a21175d667660c1b54918
-wrapdb_version = 1.87-3
+patch_url = http://conn.kloubja.cz/patches/imgui_1.87-3_path.zip
+patch_hash = b68b78cbd2e2ad8bcb70dbc0106c67f86810ae92927674b28e7033a91d3289d4
 
 [provide]
 imgui = imgui_dep
