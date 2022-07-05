@@ -3,7 +3,7 @@ directory = imgui-1.87
 url = https://github.com/ocornut/imgui
 revision = 9764adc7bb7a582601dd4dd1c34d4fa17ab5c8e8
 patch_filename = imgui_1.87-3_patch.zip
-patch_url = http://conn.kloubja.cz/patches/imgui_1.87-3_path.zip
+patch_url = http://conn.kloubja.cz/patches/imgui_1.87-3_patch.zip
 patch_hash = b68b78cbd2e2ad8bcb70dbc0106c67f86810ae92927674b28e7033a91d3289d4
 
 [provide]

@@ -5,7 +5,7 @@ source_filename = box2d-2.4.1.tar.gz
 source_hash = d6b4650ff897ee1ead27cf77a5933ea197cbeef6705638dd181adc2e816b23c2
 patch_filename = box2d_2.4.1-2_patch.zip
 patch_url = http://conn.kloubja.cz/patches/box2d_2.4.1-2_patch.zip
-patch_hash = a8521a6697b8d0036893af8cee81d4dcd003dc230f6e29b0f0dd5c0d87d04270
+patch_hash = e7746a9c471d336e5f78c9ac0d4edee21c6d00af3efd0e5489b1eef22e734188
 
 [provide]
 box2d = box2d_dep
