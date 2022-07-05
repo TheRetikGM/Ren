@@ -287,7 +287,7 @@ int32_t Renderer2D::PrepareTexture(const RawTexture& texture)
 }
 void Renderer2D::RemoveTexture(TextureID id)
 {
-    REN_ASSERT(id != TEXTURE_NONE && id >= 0 && id <= mTextureMapping.size(), "Invalid texture ID");
+    REN_ASSERT(id != TEXTURE_NONE && id >= 0 && id <= (TextureID)mTextureMapping.size(), "Invalid texture ID");
 
     // Just remove texture from batch.
     batch_tex_desc& tex_desc = mTextureMapping[id];
