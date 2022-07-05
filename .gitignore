@@ -4,6 +4,7 @@
 imgui.ini
 subprojects/imgui-*
 subprojects/packagecache
+subprojects/box2d-*
 
 # Prerequisites
 *.d

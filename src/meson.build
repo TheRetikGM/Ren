@@ -16,14 +16,12 @@ glad_inc = glad_proj.get_variable('glad_inc') # Should be temporary. For now I p
 glfw_dep = dependency('glfw3', fallback : ['glfw', 'glfw_dep'])
 imgui_proj = subproject('imgui')
 imgui_dep = imgui_proj.get_variable('imgui_dep')
+box2d_dep = subproject('box2d').get_variable('box2d_dep')
 
 cc = meson.get_compiler('c')
 if build_machine.system() == 'linux'
   ren_depends = [
     dependency('freetype2'),
-    glad_dep,
-    glfw_dep,
-    imgui_dep,
     dependency('GL'), 
     dependency('threads'),
     cc.find_library('Xrandr'),
@@ -35,11 +33,10 @@ if build_machine.system() == 'linux'
 elif build_machine.system() == 'windows'
   ren_depends = [
     dependency('freetype', fallback : ['freetype', 'ft_dep']),
-    glad_dep,
-    glfw_dep,
-    imgui_dep,
     cc.find_library('opengl32')]
 endif
+
+ren_depends = [ren_depends, glad_dep, glfw_dep, imgui_dep, box2d_dep]
 
 ren_lib = library('ren',
   ren_src,
