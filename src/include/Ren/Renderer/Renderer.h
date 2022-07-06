@@ -4,6 +4,7 @@
 #include "Ren/Renderer/OpenGL/Shader.h"
 #include "Ren/Core.h"
 #include "Ren/Renderer/OpenGL/Texture.h"
+#include "Ren/Camera.h"
 #include <list>
 
 namespace Ren
@@ -72,7 +73,7 @@ namespace Ren
         void EndPrepare();
         void ClearResources();
 
-        void BeginScene(glm::mat4 projection, glm::mat4 view);
+        void BeginScene(Camera2D* camera);
         void EndScene();
         void SubmitQuad(const Transform& trans, const Material& mat, int32_t layer = 0);
         void Render();

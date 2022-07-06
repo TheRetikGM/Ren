@@ -75,6 +75,8 @@ namespace Ren
         static void LogC(const std::string& message, const std::string& file, const int& line) { Log(LogType::Critical, message, file, line); }
         static void LogW(const std::string& message, const std::string& file, const int& line) { Log(LogType::Warning, message, file, line); }
 
+        inline static void SetHandler(LogEntryHandler* handler) { EntryHandler = handler; }
+        inline static void SetDefaultHandler() { EntryHandler = &mBasicEntryHandler; }
     private:
         Logger() {};
     };

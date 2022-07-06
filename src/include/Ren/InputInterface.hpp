@@ -49,6 +49,7 @@ namespace Ren
         {
             return pMouseButtons[int(key)];
         }
+        // Return window-space (in pixels) mouse position.
         const glm::vec2& GetMousePos() { return vMousePosition; }
 
     protected:
@@ -57,8 +58,10 @@ namespace Ren
         bool* pMouseButtons;
         bool* pMouseButtonsPressed;
         glm::vec2 vMousePosition;
+        float m_scrollOffset{ 0.0f };
 
         friend void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
         friend void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+        friend void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     };
 }

@@ -67,11 +67,11 @@ void Renderer2D::DeleteInstance()
         msInstance = nullptr;
     }
 }
-void Renderer2D::BeginScene(glm::mat4 projection, glm::mat4 view)
+void Renderer2D::BeginScene(Camera2D* camera)
 {
     REN_ASSERT(!mPreparing, "Cannot begin scene when still preparing.");
 
-    mPV = projection * view;
+    mPV = camera->GetPVMat();
     mPrimitives.clear();
     mRenderGroups.clear();
 }
